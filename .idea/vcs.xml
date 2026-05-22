@@ -3,5 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/test/RaylibPlayGround" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/test/RaylibPlayGround/vendor/raylib_git" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/vendor/raylib_git" vcs="Git" />
   </component>
 </project>
