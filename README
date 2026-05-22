@@ -1,0 +1,11 @@
+# Raylib Playground!
+
+
+# Building:
+cmake -G "Ninja" -B build -DCMAKE_BUILD_TYPE=Release
+cd build
+ninja
+
+
+# Running
+Simply run RaylibPlayGround
