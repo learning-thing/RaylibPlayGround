@@ -9,3 +9,7 @@ ninja
 
 # Running
 Simply run RaylibPlayGround
+
+# Libraries used:
+- Raylib
+- MuJS
