@@ -3,6 +3,7 @@
 # Cloning
 ```sh
 git clone https://github.com/learning-thing/RaylibPlayGround/ --recursive
+cd RaylibPlayGround
 ```
 
 # Building
