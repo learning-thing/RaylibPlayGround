@@ -1,7 +1,9 @@
 # Raylib Playground!
 
 # Cloning
+```sh
 git clone https://github.com/learning-thing/RaylibPlayGround/ --recursive
+```
 
 # Building:
 ```sh
@@ -17,7 +19,7 @@ ninja -j 4
 ```
 
 # Running
-Simply run RaylibPlayGround
+Simply run `./RaylibPlayGround` or `./RaylibPlayGround [arg]`, to use [arg] as the script to run.
 
 # Libraries used:
 - Raylib
