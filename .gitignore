@@ -7,3 +7,4 @@ vendor/mujs/build
 **/.directory
 /ChatApp/
 /docs/.obsidian/
+/docs/.obsidian/*
