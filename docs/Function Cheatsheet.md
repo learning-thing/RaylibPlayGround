@@ -99,14 +99,14 @@ Rewind(file: Number);
 (Read docs/Networking for more details)
 ```js
 
-// Host a server using the given port
+// Host a server using the given port eg.: 6767
 Host(port: Number);
 
 // Check if we are hosting a server
 IsHosting();
 
-// Connect to a server
-Connect();
+// Connect to a server eg.: 127.0.0.1:6767
+Connect(address: String);
 
 // Send any String as a message
 SendMessage(message: String);
