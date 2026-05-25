@@ -11,7 +11,6 @@ add_subdirectory(vendor/GameNetworkingSockets)
 add_executable(RaylibPlayGround main.cpp include/jsFuncs.hpp
         include/multiPlayer.hpp)
 
-add_executable(networkTest test/networkTest.cpp)
 
 target_link_libraries(RaylibPlayGround 
     PRIVATE 
