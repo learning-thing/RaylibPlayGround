@@ -25,3 +25,4 @@ Simply run `./RaylibPlayGround` or `./RaylibPlayGround [arg]`, to use [arg] as t
 # Libraries used
 - Raylib
 - MuJS
+- SteamGameNetworkingSockets

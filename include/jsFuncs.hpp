@@ -6,13 +6,17 @@
 #define RAYLIBPLAYGROUND_JSFUNCS_HPP
 
 #include <raylib.h>
+#include <cmath>
 #include <vector>
 #include <unordered_map>
 #include <cstring>
+#include <multiPlayer.hpp>
 
 #define js_addFunc(from, to) \
 js_newcfunction(runtime, from, to, 0); \
 js_setglobal(runtime, to)
+
+inline bool g_headLessMode = false;
 
 static std::vector<std::pair<std::ifstream, std::string>> openFiles;
 static std::unordered_map<std::string, size_t> fileNameMap;
@@ -51,6 +55,7 @@ std::unordered_map<std::string, KeyboardKey> keyMap = {
     {"right", KEY_RIGHT },
 
     {"space", KEY_SPACE},
+    {"enter", KEY_ENTER},
 
     {"e", KEY_E },
     {"q", KEY_Q },
@@ -61,6 +66,7 @@ std::unordered_map<std::string, KeyboardKey> keyMap = {
 inline Font defaultFont;
 
 //js functions
+static void jsHeadLessMode(js_State *J) { g_headLessMode = true; }
 static void jsPrint(js_State *J) { std::cout << js_tostring(J, 1) << std::endl; js_pop(J, 1); }
 static void jsBeginDrawing(js_State *J) { BeginDrawing(); }
 static void jsEndDrawing(js_State *J) { EndDrawing(); }
@@ -88,6 +94,14 @@ static void jsDrawRectangle(js_State *J) {
     js_pop(J, 5);
 }
 static void jsSetWindowTitle(js_State *J) { SetWindowTitle(js_tostring(J, 1)); js_pop(J, 1); }
+static void jsGetCharPressed(js_State *J) {
+    char buff[2] = {0, 0};
+    buff[0] = GetCharPressed();
+    if (buff[0]) {
+        js_pushstring(J, buff);
+    }
+}
+
 static void jsIsKeyDown(js_State *J) {
     const std::string keyName = js_tostring(J, 1); js_pushboolean(J, IsKeyDown(keyMap[keyName]));
 }
@@ -170,12 +184,73 @@ static void jsMaximizeWindow(js_State *J) {
     MaximizeWindow();
 }
 
+//Networking
+//host / connect
+//send
+//getmsgCount
+//GetMessage
+/*
+ * For multiplayer later:
+ * - jsonServerStart() {}
+ * - jsOnPlayerJoined() {}
+ * - bool isHosting()
+ * - get_client_id()
+ * - host_server(PORT)
+ * - connect_server(address, port)
+ * - sync("varName");//add to list of vars to synchronize at the end of frame
+ * // Should probably:
+ * - Add a onTick() function to the runtime, that get's called every physics/networkFrame
+ */
+
+inline networkingMode_t g_eNetMode = NETWORK_MODE_SINGLEPLAYER;
+inline Server g_nServer;
+inline Client g_nClient;
+
+static void jsHost(js_State *J) {
+    g_eNetMode = NETWORK_MODE_HOST;
+    g_nServer.Initialize(js_tointeger(J, 1));
+}
+static void jsIsHosting(js_State *J) {
+    js_pushboolean(J, (g_eNetMode == NETWORK_MODE_HOST));
+}
+static void jsConnect(js_State *J) {
+    std::clog << "Attempting to connect to: " << js_tostring(J, 1) << std::endl;
+    g_eNetMode = NETWORK_MODE_CLIENT;
+    g_nClient.Connect(js_tostring(J, 1));
+}
+
+static void jsGetMessage(js_State *J) {
+    switch (g_eNetMode) {
+        case NETWORK_MODE_HOST:
+            js_pushstring(J, g_nServer.m_sMsg.c_str());
+            break;
+        case NETWORK_MODE_CLIENT:
+            js_pushstring(J, g_nServer.m_sMsg.c_str());
+            break;
+        default:
+            js_pushundefined(J);
+            break;
+    }
+}
+static void jsSendMessage(js_State *J) {
+    // Server sends to all clients by default?
+    switch (g_eNetMode) {
+        case NETWORK_MODE_CLIENT:
+            g_nClient.Send(js_tostring(J, 1));
+            break;
+        case NETWORK_MODE_HOST:
+            g_nServer.SendStringAllClients(js_tostring(J, 1));
+            break;
+        default:break;
+    }
+}
+
 //3D
-static void jsBeginMode3D() {
+static void jsBeginMode3D(js_State *J) {
 
 }
 
-static void jsEndMode3D() {
+static void jsEndMode3D(js_State *J) {
 
 }
 
@@ -183,6 +258,7 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsPrint, "print");
     js_addFunc(jsBeginDrawing, "BeginDrawing");
     js_addFunc(jsEndDrawing, "EndDrawing");
+    js_addFunc(jsHeadLessMode, "Headless");
     js_addFunc(jsClearBackGround, "ClearBackground");
     js_addFunc(jsDrawCircle, "DrawCircle");
     js_addFunc(jsSetTargetFPS, "SetTargetFPS");
@@ -199,6 +275,7 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsSetWindowTitle, "SetWindowTitle");
     js_addFunc(jsIsKeyDown, "IsKeyDown");
     js_addFunc(jsIsKeyPressed, "IsKeyPressed");
+    js_addFunc(jsGetCharPressed, "GetCharPressed");
     js_addFunc(jsGetMouseX, "GetMouseX");
     js_addFunc(jsGetMouseY, "GetMouseY");
     js_addFunc(jsDrawText, "DrawText");
@@ -211,6 +288,13 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsGetLine, "GetLine");
     js_addFunc(jsAtEOF, "AtEOF");
     js_addFunc(jsRewind, "Rewind");
+
+    //networking & multiplayer
+    js_addFunc(jsHost, "Host");
+    js_addFunc(jsIsHosting, "IsHosting");
+    js_addFunc(jsConnect, "Connect");
+    js_addFunc(jsGetMessage, "GetMessage");
+    js_addFunc(jsSendMessage, "SendMessage");
 }
 
 #endif //RAYLIBPLAYGROUND_JSFUNCS_HPP

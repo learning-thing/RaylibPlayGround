@@ -1,3 +1,6 @@
 [submodule "vendor/raylib_git"]
 	path = vendor/raylib_git
 	url = https://github.com/raysan5/raylib.git
+[submodule "vendor/GameNetworkingSockets"]
+	path = vendor/GameNetworkingSockets
+	url = https://github.com/ValveSoftware/GameNetworkingSockets

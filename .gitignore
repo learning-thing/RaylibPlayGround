@@ -3,3 +3,6 @@ Testing
 test
 vendor/mujs/libmujs.a
 vendor/mujs/build
+/vendor/.directory
+**/.directory
+/ChatApp/
