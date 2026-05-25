@@ -258,32 +258,36 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsPrint, "print");
     js_addFunc(jsBeginDrawing, "BeginDrawing");
     js_addFunc(jsEndDrawing, "EndDrawing");
-    js_addFunc(jsHeadLessMode, "Headless");
     js_addFunc(jsClearBackGround, "ClearBackground");
-    js_addFunc(jsDrawCircle, "DrawCircle");
     js_addFunc(jsSetTargetFPS, "SetTargetFPS");
     js_addFunc(jsDrawFPS, "DrawFPS");
+
+
     js_addFunc(jsSin, "sin");
     js_addFunc(jsCos, "cos");
 
+    js_addFunc(jsHeadLessMode, "Headless");
     js_addFunc(jsGetFrameTime, "GetFrameTime");
     js_addFunc(jsGetScreenWidth, "GetScreenWidth");
     js_addFunc(jsGetScreenHeight, "GetScreenHeight");
     js_addFunc(jsMaximizeWindow, "MaximizeWindow");
-
-    js_addFunc(jsDrawRectangle, "DrawRectangle");
     js_addFunc(jsSetWindowTitle, "SetWindowTitle");
+
+    js_addFunc(jsGetCharPressed, "GetCharPressed");
     js_addFunc(jsIsKeyDown, "IsKeyDown");
     js_addFunc(jsIsKeyPressed, "IsKeyPressed");
-    js_addFunc(jsGetCharPressed, "GetCharPressed");
     js_addFunc(jsGetMouseX, "GetMouseX");
     js_addFunc(jsGetMouseY, "GetMouseY");
-    js_addFunc(jsDrawText, "DrawText");
-    js_addFunc(jsGetFileModTime, "GetFileModTime");
 
-    js_addFunc(jsSetFont, "SetFont");
+    js_addFunc(jsDrawCircle, "DrawCircle");
+    js_addFunc(jsDrawRectangle, "DrawRectangle");
+    js_addFunc(jsDrawText, "DrawText");
+
+
 
     //file reading
+    js_addFunc(jsGetFileModTime, "GetFileModTime");
+    js_addFunc(jsSetFont, "SetFont");
     js_addFunc(jsOpenFile, "OpenFile");
     js_addFunc(jsGetLine, "GetLine");
     js_addFunc(jsAtEOF, "AtEOF");
