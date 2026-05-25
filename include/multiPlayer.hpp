@@ -69,8 +69,13 @@ public:
         PollConnectionStateChanged();
         std::this_thread::sleep_for( 10ms );
     }
-    void Disconnect() const {m_pInterface->CloseConnection(m_hConnection, 0, "Disconnect requested.", 1); }
-    static void Cleanup() { ShutdownSteamDatagramConnectionSockets(); }
+    void Disconnect() const {
+        m_pInterface->CloseConnection(m_hConnection, 0, "Disconnect requested.", 1);
+    }
+    void Cleanup() const {
+        Disconnect();
+        ShutdownSteamDatagramConnectionSockets();
+    }
     std::string getMessage() {
         unreadMessage = false;
         std::string ret = m_sMsg;

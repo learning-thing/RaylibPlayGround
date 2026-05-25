@@ -104,7 +104,16 @@ int main(const int argc, char **argv) {
             //std::cout << "Running onMessage(): " << onMsgCall << std::endl;
             js_dostring(runtime, onMsgCall.c_str());
         }
-
+    }
+    switch (g_eNetMode) {
+        case NETWORK_MODE_HOST:
+            g_nServer.Cleanup();
+            break;
+        case NETWORK_MODE_CLIENT:
+            g_nClient.Cleanup();
+            break;
+        default:
+            break;
     }
     if (!g_headLessMode) CloseWindow();
     return 0;
