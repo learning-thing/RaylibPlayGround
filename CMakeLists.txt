@@ -12,7 +12,6 @@ add_executable(RaylibPlayGround main.cpp include/jsFuncs.hpp
         include/multiPlayer.hpp)
 
 add_executable(networkTest test/networkTest.cpp)
-target_link_libraries(networkTest GameNetworkingSockets::static)
 
 target_link_libraries(RaylibPlayGround 
     PRIVATE 
