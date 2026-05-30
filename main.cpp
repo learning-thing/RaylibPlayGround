@@ -14,7 +14,7 @@ using namespace std::chrono_literals;
 void create_template(const char *projectName) {
     std::ofstream script(projectName);
     script <<
-"var player;\n var velocity;\n"
+"var player;\nvar velocity;\n"
 "var circleColor = {\n"
 "   r: 50,\n"
 "   g: 50,\n"

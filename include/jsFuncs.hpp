@@ -16,6 +16,8 @@
 #endif
 #include <bits/this_thread_sleep.h>
 
+#define jsFunc(name) static void name(js_State *J)
+
 #define js_addFunc(from, to) \
 js_newcfunction(runtime, from, to, 0); \
 js_setglobal(runtime, to)
@@ -107,12 +109,12 @@ static std::unordered_map<std::string, KeyboardKey> keyMap = {
 static Font defaultFont;
 
 //js functions
-static void jsHeadLessMode(js_State *J) { g_headLessMode = true; }
-static void jsPrint(js_State *J) { std::cout << js_tostring(J, 1) << std::endl; js_pop(J, 1); }
-static void jsBeginDrawing(js_State *J) { BeginDrawing(); }
-static void jsEndDrawing(js_State *J) { EndDrawing(); }
-static void jsClearBackGround(js_State *J) { ClearBackground(js_toColor(J, 1)); }
-static void jsDrawCircle(js_State *J) {
+jsFunc(jsHeadLessMode) { g_headLessMode = true; }
+jsFunc(jsPrint) { std::cout << js_tostring(J, 1) << std::endl; js_pop(J, 1); }
+jsFunc(jsBeginDrawing) { BeginDrawing(); }
+jsFunc(jsEndDrawing) { EndDrawing(); }
+jsFunc(jsClearBackGround) { ClearBackground(js_toColor(J, 1)); }
+jsFunc(jsDrawCircle) {
     const int x = js_tointeger(J, 1);
     const int y = js_tointeger(J, 2);
     const auto rad = static_cast<float>(js_tointeger(J, 3));
@@ -123,24 +125,24 @@ static void jsDrawCircle(js_State *J) {
     //std::cout << "Draw at " << x << " " << y << " " << r << std::endl;
     js_pop(J, 4);
 }
-static void jsSetTargetFPS(js_State *J) { SetTargetFPS(js_tointeger(J, 1)); js_pop(J, 1); }
-static void jsDrawFPS(js_State *J) {DrawFPS(js_tointeger(J, 1), js_tointeger(J, 2)); js_pop(J, 2); }
-static void jsSin(js_State *J) { js_pushnumber(J, sin(js_tonumber(J, 1))); }
-static void jsCos(js_State *J) { js_pushnumber(J, cos(js_tonumber(J, 1))); }
-static void jsGetFrameTime(js_State *J) {js_pushnumber(J, GetFrameTime()); }
-static void jsGetScreenWidth(js_State *J) { js_pushnumber(J, GetScreenWidth()); }
-static void jsGetScreenHeight(js_State *J) { js_pushnumber(J, GetScreenHeight()); }
-static void jsDrawRectangle(js_State *J) {
+jsFunc(jsSetTargetFPS) { SetTargetFPS(js_tointeger(J, 1)); js_pop(J, 1); }
+jsFunc(jsDrawFPS) {DrawFPS(js_tointeger(J, 1), js_tointeger(J, 2)); js_pop(J, 2); }
+jsFunc(jsSin) { js_pushnumber(J, sin(js_tonumber(J, 1))); }
+jsFunc(jsCos) { js_pushnumber(J, cos(js_tonumber(J, 1))); }
+jsFunc(jsGetFrameTime) {js_pushnumber(J, GetFrameTime()); }
+jsFunc(jsGetScreenWidth) { js_pushnumber(J, GetScreenWidth()); }
+jsFunc(jsGetScreenHeight) { js_pushnumber(J, GetScreenHeight()); }
+jsFunc(jsDrawRectangle) {
     DrawRectangle(js_tointeger(J, 1), js_tointeger(J, 2),js_tointeger(J, 3), js_tointeger(J, 4), js_toColor(J, 5) );
     js_pop(J, 5);
 }
-static void jsDrawRectangleLines(js_State *J) {
+jsFunc(jsDrawRectangleLines) {
     DrawRectangleLines(js_tointeger(J, 1), js_tointeger(J, 2), js_tointeger(J, 3), js_tointeger(J, 4),
                        js_toColor(J, 5));
     js_pop(J, 5);
 }
-static void jsSetWindowTitle(js_State *J) { SetWindowTitle(js_tostring(J, 1)); js_pop(J, 1); }
-static void jsGetCharPressed(js_State *J) {
+jsFunc(jsSetWindowTitle) { SetWindowTitle(js_tostring(J, 1)); js_pop(J, 1); }
+jsFunc(jsGetCharPressed) {
     char buff[2] = {0, 0};
     buff[0] = static_cast<char>(GetCharPressed());
     if (buff[0]) {
@@ -148,28 +150,28 @@ static void jsGetCharPressed(js_State *J) {
     }
 }
 
-static void jsIsKeyDown(js_State *J) {
+jsFunc(jsIsKeyDown) {
     const std::string keyName = js_tostring(J, 1); js_pushboolean(J, IsKeyDown(keyMap[keyName]));
 }
-static void jsIsKeyPressed(js_State *J) {
+jsFunc (jsIsKeyPressed) {
     const std::string keyName = js_tostring(J, 1); js_pushboolean(J, IsKeyPressed(keyMap[keyName]));
 }
-static void jsGetMouseX(js_State *J) { js_pushnumber(J, GetMouseX()); }
-static void jsGetMouseY(js_State *J) { js_pushnumber(J, GetMouseY()); }
-static void jsGetMouseDeltaX(js_State *J) {
+jsFunc(jsGetMouseX) { js_pushnumber(J, GetMouseX()); }
+jsFunc(jsGetMouseY) { js_pushnumber(J, GetMouseY()); }
+jsFunc(jsGetMouseDeltaX) {
     js_pushnumber(J, GetMouseDelta().x);
 }
-static void jsGetMouseDeltaY(js_State *J) {
+jsFunc(jsGetMouseDeltaY) {
     js_pushnumber(J, GetMouseDelta().y);
 }
 
     // DrawText("text", x, y, fontsize, COLOR);
-static void jsDrawText(js_State *J) {
+jsFunc(jsDrawText) {
     DrawTextEx(defaultFont, js_tostring(J, 1), {static_cast<float>(js_tonumber(J, 2)), static_cast<float>(js_tonumber(J, 3))}, static_cast<float>(js_tonumber(J, 4)), 1, js_toColor(J, 5)); js_pop(J, 5);
 }
 
 //OpenFile(filename: str)
-static void jsOpenFile(js_State *J) {
+jsFunc(jsOpenFile) {
     // Get the file name
     const std::string fileName = js_tostring(J, 1);
 
@@ -193,7 +195,7 @@ static void jsOpenFile(js_State *J) {
     js_pushnumber(J, static_cast<double>(newID));
 }
 
-static void jsGetLine(js_State *J) {
+jsFunc(jsGetLine) {
     //get by id
     const size_t id = js_tointeger(J, 1);
     const int maxChars = js_tointeger(J, 2);
@@ -207,13 +209,13 @@ static void jsGetLine(js_State *J) {
     delete[] buffer;
 }
 
-static void jsAtEOF(js_State *J) {
+jsFunc(jsAtEOF) {
     const size_t id = js_tointeger(J, 1);
     //js_pop(J, 1);
     js_pushboolean(J, openFiles[id].first.eof());
 }
 
-static void jsRewind(js_State *J) {
+jsFunc(jsRewind) {
     //Close and reopen
     const size_t id = js_tointeger(J, 1);
     openFiles[id].first.clear();
@@ -222,7 +224,7 @@ static void jsRewind(js_State *J) {
     openFiles[id].first.open(openFiles[id].second);
 }
 
-static void jsGetFileModTime(js_State *J) {
+jsFunc(jsGetFileModTime) {
     js_pushnumber(J, static_cast<double>(GetFileModTime(js_tostring(J, 1))));
 }
 
@@ -230,7 +232,7 @@ static void jsSetFont(js_State *J) {
     defaultFont = LoadFont(js_tostring(J, 1));
 }
 
-static void jsMaximizeWindow(js_State *J) {
+jsFunc(jsMaximizeWindow) {
     MaximizeWindow();
 }
 
@@ -286,12 +288,12 @@ static void jsSendMessage(js_State *J) {
 }
 #endif
 
-static void jsSleep(js_State *J) {
+jsFunc(jsSleep) {
     std::this_thread::sleep_for(std::chrono::milliseconds( js_tointeger(J, 1)) );
 }
 
 //3D
-static void jsBeginMode3D(js_State *J) {
+jsFunc(jsBeginMode3D) {
     const Camera3D cam = js_toCamera(J, 1);
     BeginMode3D(cam);
 }
@@ -300,31 +302,31 @@ inline void jsEndMode3D(js_State *J) {
     EndMode3D();
 }
 
-static void jsDrawGrid(js_State *J) {
+jsFunc(jsDrawGrid) {
     const int a = js_tointeger(J, 1);
     const int b = js_tointeger(J, 2);
     DrawGrid(a, b);
     js_pop(J, 2);
 }
 
-static void jsLoadShader(js_State *J) {
+jsFunc(jsLoadShader) {
     shaders.push_back(LoadShader(js_tostring(J, 1), js_tostring(J, 2)));
     js_pushnumber(J, static_cast<double>(shaders.size()));
 }
 
-static void jsBeginShader(js_State *J) {
+jsFunc(jsBeginShader) {
     BeginShaderMode(shaders[js_tointeger(J, 1)]);
 }
 
-static void jsEndShader(js_State *J) {
+jsFunc(jsEndShader) {
     EndShaderMode();
 }
 
-static void jsSetUniform() {
+jsFunc(jsSetUniform) {
 
 }
 
-static void jsDrawCube(js_State *J) {
+jsFunc(jsDrawCube) {
     // Get the color from an object
     constexpr unsigned int argPos = 1;
     const unsigned int argCount = 5;
@@ -347,19 +349,19 @@ static void jsDrawCube(js_State *J) {
     const float length = js_tonumber(J, 4);
 
     Color col;
-    assert(js_hasproperty(J, 5, "r"));
+    //assert(js_hasproperty(J, 5, "r"));
     js_getproperty(J, 5, "r");
     col.r = js_tointeger(J, js_gettop(J)-1);
 
-    assert(js_hasproperty(J, 5, "g"));
+    //assert(js_hasproperty(J, 5, "g"));
     js_getproperty(J, 5, "g");
     col.g = js_tointeger(J, js_gettop(J)-1);
 
-    assert(js_hasproperty(J, 5, "b"));
+    //assert(js_hasproperty(J, 5, "b"));
     js_getproperty(J, 5, "b");
     col.b = js_tointeger(J, js_gettop(J)-1);
 
-    assert(js_hasproperty(J, 5, "a"));
+    //assert(js_hasproperty(J, 5, "a"));
     js_getproperty(J, 5, "a");
     col.a = js_tointeger(J, js_gettop(J)-1);
 
@@ -368,7 +370,7 @@ static void jsDrawCube(js_State *J) {
     DrawCube({x, y, z}, width, height, length, col);
 }
 
-static void jsDrawCubeWires(js_State *J) {
+jsFunc(jsDrawCubeWires) {
     // Get the color from an object
     const unsigned int argPos = 1;
     const unsigned int argCount = 5;
@@ -407,11 +409,23 @@ static void jsDrawCubeWires(js_State *J) {
     DrawCubeWires({x, y, z}, width, height, length, col);
 }
 
-static void jsDrawCubeV(js_State *J) {
+//TODO: Fix this shit
+//- toVec function needs to use getTop
+//- currently toVec and toColor are still broken if used as non-first argument
+jsFunc(jsDrawCubeV) {
     DrawCubeV(js_toVec3(J, 1), js_toVec3(J, 2), js_toColor(J, 3));
 }
 
-static void setupRaylibFuncs(js_State *runtime) {
+//TODO: Load models into vec or something idk
+jsFunc(jsLoadModel) {
+
+}
+
+jsFunc(jsCloseWindow) {
+    CloseWindow();
+}
+
+inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsPrint, "print");
     js_addFunc(jsBeginDrawing, "BeginDrawing");
     js_addFunc(jsEndDrawing, "EndDrawing");
@@ -426,12 +440,14 @@ static void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsSin, "sin");
     js_addFunc(jsCos, "cos");
 
+    //window n shit
     js_addFunc(jsHeadLessMode, "Headless");
     js_addFunc(jsGetFrameTime, "GetFrameTime");
     js_addFunc(jsGetScreenWidth, "GetScreenWidth");
     js_addFunc(jsGetScreenHeight, "GetScreenHeight");
     js_addFunc(jsMaximizeWindow, "MaximizeWindow");
     js_addFunc(jsSetWindowTitle, "SetWindowTitle");
+    js_addFunc(jsCloseWindow, "CloseWindow");
 
     js_addFunc(jsGetCharPressed, "GetCharPressed");
     js_addFunc(jsIsKeyDown, "IsKeyDown");

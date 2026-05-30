@@ -26,28 +26,32 @@ function onStart() {
     rotation = 0;
     _rotation = 0;
     delta = .016;
+    SetTargetFPS(100);
+
 }
 
 function onReady() {
-    SetTargetFPS(100);
+    //SetTargetFPS(100);
     print("Ready");
 }
 
+
 print("Hot reload");
+
 
 function onFrame() {
     delta = GetFrameTime();
     iTime += delta;
-    if (IsKeyDown("w")) {
-        distance--;
+    if (IsKeyDown("up")) {
+        distance-=delta*100;
     }
-    if (IsKeyDown("s")) {
-        distance++;
+    if (IsKeyDown("down")) {
+        distance+=delta*100;
     }
-    if (IsKeyDown("d")) {
+    if (IsKeyDown("right")) {
         rotation+=delta;
     }
-    if (IsKeyDown("a")) {
+    if (IsKeyDown("left")) {
         rotation-=delta;
     }
     _distance += (distance-_distance)*delta*2;
@@ -58,7 +62,14 @@ function onFrame() {
     ClearBackground({r: 50, g: 50, b: 50, a: 255});
     DrawFPS(10, 10);
         BeginMode3D(camera);
-        DrawGrid(100, 5);
+
+        if (IsKeyDown("space")) {
+            rotation-=GetMouseDeltaX()*.01;
+            camera.position.y += GetMouseDeltaY()*.1;
+        }
+
+
+        //DrawGrid(100, 5);
         for (var y = 0; y < 20; y++) {
             for (var i = 0; i < 10; i++) {
                 blockPos.y = sin(iTime+y*.5+i*.5)*2;
@@ -67,7 +78,7 @@ function onFrame() {
                 DrawCube(blockPos, 3, 3, 3, (y % 2) ? WHITE : BLACK);
             }
             for (var i = 0; i < 10; i++) {
-                blockPos.y = sin(iTime+y*.5+i*.5)*2;
+                blockPos.y = sin(iTime+y*.5+i*.5-.25)*2;
                 blockPos.x = -20+6*i;
                 DrawCube(blockPos, 3, 3, 3, (y % 2) ? BLACK : WHITE);
             }

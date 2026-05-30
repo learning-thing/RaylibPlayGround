@@ -12,10 +12,12 @@ add_subdirectory(vendor/raylib_git)
 add_executable(RaylibPlayGround main.cpp include/jsFuncs.hpp
         include/multiPlayer.hpp)
 
+
+
 target_link_libraries(RaylibPlayGround 
     PRIVATE
-    #"-static-libgcc -static-libstdc++"
+    "-static-libgcc -static-libstdc++"
     ${CMAKE_CURRENT_SOURCE_DIR}/vendor/mujs/build/release/libmujs.a
-    raylib
+    raylib_static
     #GameNetworkingSockets::static
 )
