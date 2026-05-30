@@ -8,3 +8,4 @@ vendor/mujs/build
 /ChatApp/
 /docs/.obsidian/
 /docs/.obsidian/*
+/qodana.yaml

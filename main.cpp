@@ -62,8 +62,9 @@ int main(const int argc, char **argv) {
     //Function on init
     //App start, Raylib not initilaized
     js_dostring(runtime, "onStart();");
-
+#ifdef multiplayer
     if (!g_headLessMode)
+#endif
         InitWindow(1080, 720, "Hello world");
 
     // Onready function (after window creation)
@@ -77,6 +78,7 @@ int main(const int argc, char **argv) {
         }
         js_dostring(runtime, "onFrame();");
 
+#ifdef multiplayer
         // Networking update
         std::string onMsgCall = "onMessage(\"";
         bool gotMsg = false;
@@ -104,7 +106,10 @@ int main(const int argc, char **argv) {
             //std::cout << "Running onMessage(): " << onMsgCall << std::endl;
             js_dostring(runtime, onMsgCall.c_str());
         }
+#endif
+
     }
+#ifdef multiplayer
     switch (g_eNetMode) {
         case NETWORK_MODE_HOST:
             g_nServer.Cleanup();
@@ -116,5 +121,6 @@ int main(const int argc, char **argv) {
             break;
     }
     if (!g_headLessMode) CloseWindow();
+#endif
     return 0;
 }

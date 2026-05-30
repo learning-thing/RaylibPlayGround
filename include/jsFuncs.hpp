@@ -5,12 +5,16 @@
 #ifndef RAYLIBPLAYGROUND_JSFUNCS_HPP
 #define RAYLIBPLAYGROUND_JSFUNCS_HPP
 
+#include <assert.h>
 #include <raylib.h>
 #include <cmath>
 #include <vector>
 #include <unordered_map>
 #include <cstring>
+#ifdef multiplayer
 #include <multiPlayer.hpp>
+#endif
+#include <bits/this_thread_sleep.h>
 
 #define js_addFunc(from, to) \
 js_newcfunction(runtime, from, to, 0); \
@@ -22,7 +26,25 @@ static std::vector<std::pair<std::ifstream, std::string>> openFiles;
 static std::unordered_map<std::string, size_t> fileNameMap;
 
 //Helper functions
-Color js_toColor(js_State *J, const unsigned short argPos) {
+static Vector3 js_toVec3(js_State *J, const unsigned short argPos) {
+    // Get the color from an object
+    js_getproperty(J, argPos, "x");
+    const auto x = static_cast<float>(js_tonumber(J, argPos + 1));
+    js_pop(J, 1);
+
+    js_getproperty(J, argPos, "y");
+    const auto y = static_cast<float>(js_tonumber(J, argPos + 1));
+    js_pop(J, 1);
+
+    js_getproperty(J, argPos, "z");
+    const auto z = static_cast<float>(js_tonumber(J, argPos + 1));
+    js_pop(J, 1);
+
+    return {x, y, z};
+}
+
+//Helper functions
+static Color js_toColor(js_State *J, const unsigned short argPos) {
     // Get the color from an object
     js_getproperty(J, argPos, "r");
     const unsigned char r = js_tointeger(J, argPos + 1);
@@ -43,7 +65,27 @@ Color js_toColor(js_State *J, const unsigned short argPos) {
     return {r, g, b, a};
 }
 
-std::unordered_map<std::string, KeyboardKey> keyMap = {
+static Camera3D js_toCamera(js_State *J, const unsigned short argPos) {
+    js_getproperty(J, argPos, "position");
+    const Vector3 position = js_toVec3(J, argPos+1);
+    js_pop(J, 1);
+
+    js_getproperty(J, argPos, "target");
+    const Vector3 target = js_toVec3(J, argPos+1);
+    js_pop(J, 1);
+
+    js_getproperty(J, argPos, "up");
+    const Vector3 up = js_toVec3(J, argPos+1);
+    js_pop(J, 1);
+
+    js_getproperty(J, argPos, "fovy");
+    const float fov = static_cast<float>(js_tonumber(J, argPos+1));
+    js_pop(J, 1);
+
+    return {position, target, up, fov, CAMERA_PERSPECTIVE};
+}
+
+static std::unordered_map<std::string, KeyboardKey> keyMap = {
     {"w", KEY_W },
     {"a", KEY_A },
     {"s", KEY_S },
@@ -62,15 +104,14 @@ std::unordered_map<std::string, KeyboardKey> keyMap = {
     {"x", KEY_X },
     {"y",  KEY_Y  }
 };
-
-inline Font defaultFont;
+static Font defaultFont;
 
 //js functions
 static void jsHeadLessMode(js_State *J) { g_headLessMode = true; }
 static void jsPrint(js_State *J) { std::cout << js_tostring(J, 1) << std::endl; js_pop(J, 1); }
 static void jsBeginDrawing(js_State *J) { BeginDrawing(); }
 static void jsEndDrawing(js_State *J) { EndDrawing(); }
-static void jsClearBackGround(js_State *J) { ClearBackground(BLACK); }
+static void jsClearBackGround(js_State *J) { ClearBackground(js_toColor(J, 1)); }
 static void jsDrawCircle(js_State *J) {
     const int x = js_tointeger(J, 1);
     const int y = js_tointeger(J, 2);
@@ -93,10 +134,15 @@ static void jsDrawRectangle(js_State *J) {
     DrawRectangle(js_tointeger(J, 1), js_tointeger(J, 2),js_tointeger(J, 3), js_tointeger(J, 4), js_toColor(J, 5) );
     js_pop(J, 5);
 }
+static void jsDrawRectangleLines(js_State *J) {
+    DrawRectangleLines(js_tointeger(J, 1), js_tointeger(J, 2), js_tointeger(J, 3), js_tointeger(J, 4),
+                       js_toColor(J, 5));
+    js_pop(J, 5);
+}
 static void jsSetWindowTitle(js_State *J) { SetWindowTitle(js_tostring(J, 1)); js_pop(J, 1); }
 static void jsGetCharPressed(js_State *J) {
     char buff[2] = {0, 0};
-    buff[0] = GetCharPressed();
+    buff[0] = static_cast<char>(GetCharPressed());
     if (buff[0]) {
         js_pushstring(J, buff);
     }
@@ -110,22 +156,27 @@ static void jsIsKeyPressed(js_State *J) {
 }
 static void jsGetMouseX(js_State *J) { js_pushnumber(J, GetMouseX()); }
 static void jsGetMouseY(js_State *J) { js_pushnumber(J, GetMouseY()); }
+static void jsGetMouseDeltaX(js_State *J) {
+    js_pushnumber(J, GetMouseDelta().x);
+}
+static void jsGetMouseDeltaY(js_State *J) {
+    js_pushnumber(J, GetMouseDelta().y);
+}
 
-// DrawText("text", x, y, fontsize, COLOR);
+    // DrawText("text", x, y, fontsize, COLOR);
 static void jsDrawText(js_State *J) {
-    DrawTextEx(defaultFont, js_tostring(J, 1), {static_cast<float>(js_tonumber(J, 2)), static_cast<float>(js_tonumber(J, 3))}, js_tointeger(J, 4), 1, js_toColor(J, 5)); js_pop(J, 5);
+    DrawTextEx(defaultFont, js_tostring(J, 1), {static_cast<float>(js_tonumber(J, 2)), static_cast<float>(js_tonumber(J, 3))}, static_cast<float>(js_tonumber(J, 4)), 1, js_toColor(J, 5)); js_pop(J, 5);
 }
 
 //OpenFile(filename: str)
 static void jsOpenFile(js_State *J) {
     // Get the file name
     const std::string fileName = js_tostring(J, 1);
-    const auto alredy_existing_file = fileNameMap.find(fileName);
 
     //Check if it's valid, else stop opening the file
-    if (alredy_existing_file != fileNameMap.end()) {
-        //std::cout << "This file has been opened before with id: " << alredy_existing_file->second << std::endl;
-        js_pushnumber(J, alredy_existing_file->second);
+    if (const auto already_existing_file = fileNameMap.find(fileName); already_existing_file != fileNameMap.end()) {
+        //std::cout << "This file has been opened before with id: " << already_existing_file->second << std::endl;
+        js_pushnumber(J, static_cast<double>(already_existing_file->second));
         return;
     }
 
@@ -139,7 +190,7 @@ static void jsOpenFile(js_State *J) {
     }
 
     js_pop(J, 1);
-    js_pushnumber(J, newID);
+    js_pushnumber(J, static_cast<double>(newID));
 }
 
 static void jsGetLine(js_State *J) {
@@ -164,7 +215,6 @@ static void jsAtEOF(js_State *J) {
 
 static void jsRewind(js_State *J) {
     //Close and reopen
-
     const size_t id = js_tointeger(J, 1);
     openFiles[id].first.clear();
     openFiles[id].first.sync();
@@ -173,7 +223,7 @@ static void jsRewind(js_State *J) {
 }
 
 static void jsGetFileModTime(js_State *J) {
-    js_pushnumber(J, GetFileModTime(js_tostring(J, 1)));
+    js_pushnumber(J, static_cast<double>(GetFileModTime(js_tostring(J, 1))));
 }
 
 static void jsSetFont(js_State *J) {
@@ -187,7 +237,7 @@ static void jsMaximizeWindow(js_State *J) {
 //Networking
 //host / connect
 //send
-//getmsgCount
+//get message count
 //GetMessage
 /*
  * For multiplayer later:
@@ -199,9 +249,12 @@ static void jsMaximizeWindow(js_State *J) {
  * - connect_server(address, port)
  * - sync("varName");//add to list of vars to synchronize at the end of frame
  * // Should probably:
- * - Add a onTick() function to the runtime, that get's called every physics/networkFrame
+ * - Add a onTick() function to the runtime, that gets called every physics/networkFrame
  */
 
+static std::vector<Shader> shaders;
+
+#ifdef multilayer
 inline networkingMode_t g_eNetMode = NETWORK_MODE_SINGLEPLAYER;
 inline Server g_nServer;
 inline Client g_nClient;
@@ -219,19 +272,6 @@ static void jsConnect(js_State *J) {
     g_nClient.Connect(js_tostring(J, 1));
 }
 
-static void jsGetMessage(js_State *J) {
-    switch (g_eNetMode) {
-        case NETWORK_MODE_HOST:
-            js_pushstring(J, g_nServer.m_sMsg.c_str());
-            break;
-        case NETWORK_MODE_CLIENT:
-            js_pushstring(J, g_nServer.m_sMsg.c_str());
-            break;
-        default:
-            js_pushundefined(J);
-            break;
-    }
-}
 static void jsSendMessage(js_State *J) {
     // Server sends to all clients by default?
     switch (g_eNetMode) {
@@ -241,28 +281,148 @@ static void jsSendMessage(js_State *J) {
         case NETWORK_MODE_HOST:
             g_nServer.SendStringAllClients(js_tostring(J, 1));
             break;
-        default:break;
+        default: break;
     }
+}
+#endif
+
+static void jsSleep(js_State *J) {
+    std::this_thread::sleep_for(std::chrono::milliseconds( js_tointeger(J, 1)) );
 }
 
 //3D
 static void jsBeginMode3D(js_State *J) {
+    const Camera3D cam = js_toCamera(J, 1);
+    BeginMode3D(cam);
+}
+
+inline void jsEndMode3D(js_State *J) {
+    EndMode3D();
+}
+
+static void jsDrawGrid(js_State *J) {
+    const int a = js_tointeger(J, 1);
+    const int b = js_tointeger(J, 2);
+    DrawGrid(a, b);
+    js_pop(J, 2);
+}
+
+static void jsLoadShader(js_State *J) {
+    shaders.push_back(LoadShader(js_tostring(J, 1), js_tostring(J, 2)));
+    js_pushnumber(J, static_cast<double>(shaders.size()));
+}
+
+static void jsBeginShader(js_State *J) {
+    BeginShaderMode(shaders[js_tointeger(J, 1)]);
+}
+
+static void jsEndShader(js_State *J) {
+    EndShaderMode();
+}
+
+static void jsSetUniform() {
 
 }
 
-static void jsEndMode3D(js_State *J) {
+static void jsDrawCube(js_State *J) {
+    // Get the color from an object
+    constexpr unsigned int argPos = 1;
+    const unsigned int argCount = 5;
 
+    //TODO: Use js_gettop to get stuff
+    assert(js_hasproperty(J, argPos, "x"));
+    js_getproperty(J, argPos, "x");
+    const float x = js_tonumber(J, js_gettop(J)-1);
+
+    assert(js_hasproperty(J, argPos, "y"));
+    js_getproperty(J, argPos, "y");
+    const float y = js_tonumber(J, js_gettop(J)-1);
+
+    assert(js_hasproperty(J, argPos, "z"));
+    js_getproperty(J, argPos, "z");
+    const float z = js_tonumber(J, js_gettop(J)-1);
+
+    const float width = js_tonumber(J, 2);
+    const float height = js_tonumber(J, 3);
+    const float length = js_tonumber(J, 4);
+
+    Color col;
+    assert(js_hasproperty(J, 5, "r"));
+    js_getproperty(J, 5, "r");
+    col.r = js_tointeger(J, js_gettop(J)-1);
+
+    assert(js_hasproperty(J, 5, "g"));
+    js_getproperty(J, 5, "g");
+    col.g = js_tointeger(J, js_gettop(J)-1);
+
+    assert(js_hasproperty(J, 5, "b"));
+    js_getproperty(J, 5, "b");
+    col.b = js_tointeger(J, js_gettop(J)-1);
+
+    assert(js_hasproperty(J, 5, "a"));
+    js_getproperty(J, 5, "a");
+    col.a = js_tointeger(J, js_gettop(J)-1);
+
+    //std::cout << "Drawing cube" << std::endl;
+    //std::cout << x << y << z << width << height << length;
+    DrawCube({x, y, z}, width, height, length, col);
 }
 
-inline void setupRaylibFuncs(js_State *runtime) {
+static void jsDrawCubeWires(js_State *J) {
+    // Get the color from an object
+    const unsigned int argPos = 1;
+    const unsigned int argCount = 5;
+
+    assert(js_hasproperty(J, argPos, "x"));
+    js_getproperty(J, argPos, "x");
+    const float x = js_tonumber(J, argCount + 2);
+
+    js_getproperty(J, argPos, "y");
+    const float y = js_tonumber(J, argCount + 3);
+
+    js_getproperty(J, argPos, "z");
+    const float z = js_tonumber(J, argCount + 4);
+
+    const float width = js_tonumber(J, 2);
+    const float height = js_tonumber(J, 3);
+    const float length = js_tonumber(J, 4);
+
+    Color col;
+    assert(js_hasproperty(J, 5, "r"));
+    js_getproperty(J, 5, "r");
+    col.r = js_tointeger(J, js_gettop(J)-1);
+
+    assert(js_hasproperty(J, 5, "g"));
+    js_getproperty(J, 5, "g");
+    col.g = js_tointeger(J, js_gettop(J)-1);
+
+    assert(js_hasproperty(J, 5, "b"));
+    js_getproperty(J, 5, "b");
+    col.b = js_tointeger(J, js_gettop(J)-1);
+
+    assert(js_hasproperty(J, 5, "a"));
+    js_getproperty(J, 5, "a");
+    col.a = js_tointeger(J, js_gettop(J)-1);
+
+    DrawCubeWires({x, y, z}, width, height, length, col);
+}
+
+static void jsDrawCubeV(js_State *J) {
+    DrawCubeV(js_toVec3(J, 1), js_toVec3(J, 2), js_toColor(J, 3));
+}
+
+static void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsPrint, "print");
     js_addFunc(jsBeginDrawing, "BeginDrawing");
     js_addFunc(jsEndDrawing, "EndDrawing");
+    js_addFunc(jsBeginMode3D, "BeginMode3D");
+    js_addFunc(jsEndMode3D, "EndMode3D");
     js_addFunc(jsClearBackGround, "ClearBackground");
     js_addFunc(jsSetTargetFPS, "SetTargetFPS");
+    js_addFunc(jsSleep, "Sleep");
     js_addFunc(jsDrawFPS, "DrawFPS");
 
-
+    //Math'n'shit
     js_addFunc(jsSin, "sin");
     js_addFunc(jsCos, "cos");
 
@@ -278,12 +438,23 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsIsKeyPressed, "IsKeyPressed");
     js_addFunc(jsGetMouseX, "GetMouseX");
     js_addFunc(jsGetMouseY, "GetMouseY");
+    js_addFunc(jsGetMouseDeltaX, "GetMouseDeltaX");
+    js_addFunc(jsGetMouseDeltaY, "GetMouseDeltaY");
 
+    //Draw stuff
     js_addFunc(jsDrawCircle, "DrawCircle");
     js_addFunc(jsDrawRectangle, "DrawRectangle");
+    js_addFunc(jsDrawRectangleLines, "DrawRectangleLines");
     js_addFunc(jsDrawText, "DrawText");
-
-
+    // - 3D
+    js_addFunc(jsDrawGrid, "DrawGrid");
+    js_addFunc(jsDrawCube, "DrawCube");
+    js_addFunc(jsDrawCubeV, "DrawCubeV");
+    js_addFunc(jsDrawCubeWires, "DrawCubeWires");
+    // - Shader
+    js_addFunc(jsLoadShader, "LoadShader");
+    js_addFunc(jsBeginShader, "BeginShader");
+    js_addFunc(jsEndShader, "EndShader");
 
     //file reading
     js_addFunc(jsGetFileModTime, "GetFileModTime");
@@ -294,11 +465,14 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsRewind, "Rewind");
 
     //networking & multiplayer
+#ifdef multiplayer
     js_addFunc(jsHost, "Host");
     js_addFunc(jsIsHosting, "IsHosting");
     js_addFunc(jsConnect, "Connect");
-    js_addFunc(jsGetMessage, "GetMessage");
     js_addFunc(jsSendMessage, "SendMessage");
+#endif
+
 }
 
+static volatile const char *inBinaryMsg = "Bro please don't reverse engineer, there's source code on github";
 #endif //RAYLIBPLAYGROUND_JSFUNCS_HPP

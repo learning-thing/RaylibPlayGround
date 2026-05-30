@@ -41,6 +41,12 @@ GetMouseX();
 
 // Get the Y Position of the mouse
 GetMouseY();
+
+// Get the mouse position x delta
+GetMouseDeltaX();
+
+// Get the mouse position y delta
+GetMouseDeltaY();
 ```
 
 # Drawing
@@ -64,6 +70,9 @@ DrawCicle(x, y, radius, {r, g, b, a});
 
 // Draw a (filled) Rectangle
 DrawRectangle(x, y, width, height, {r, g, b, a});
+
+// Draw an outline of a rectange
+DrawRectangleLines(x, y, width, height, {r, g, b, a});
 
 // Draw a string/Text
 DrawText(text: String, x, y, fontSize, {r, g, b, a} );

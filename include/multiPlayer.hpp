@@ -5,6 +5,8 @@
 #ifndef RAYLIBPLAYGROUND_MULTIPLAYER_HPP
 #define RAYLIBPLAYGROUND_MULTIPLAYER_HPP
 
+#ifdef multiplayer
+
 #include <assert.h>
 #include <isteamnetworkingsockets.h>
 #include <isteamnetworkingutils.h>
@@ -308,5 +310,6 @@ public:
 
     }
 };
+#endif
 
 #endif //RAYLIBPLAYGROUND_MULTIPLAYER_HPP

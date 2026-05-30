@@ -7,12 +7,15 @@ function onStart() {
    line = "";
 }
 
-var history = [];
+var history;
 
 function onReady() {
+    SetFont("fonts/Inconsolata-LGC-Bold.otf");
     Connect("127.0.0.1:6767");
     name = "";
+    history = []
 }
+
 function onFrame() {
     BeginDrawing();
     ClearBackground();
@@ -23,12 +26,12 @@ function onFrame() {
         line+=char;
     }
 
-    DrawRectangle(10, 45, GetScreenWidth()-20, 60, {r: 100, g: 120, b: 200, a: 255});
-    DrawText(line, 20, 50, 30, {r: 255, g: 100, b: 255, a: 255} );
+    DrawRectangle(10, 45, GetScreenWidth()-20, 60, {r: 200, g: 120, b: 255, a: 255});
+    DrawText(line, 20, 50, 30, {r: 200, g: 200, b: 255, a: 255} );
 
     for (var i = 0; i < 10; i++) {
         if (history[history.length-i] !== undefined)
-            if (history[history.length-i][6] == name[6]) {
+            if (history[history.length-i][6] === name[6]) {
                 DrawText(history[history.length - i], 20, 150 + i * 50, 40, {r: 100, g: 100, b: 255, a: 255});
             }
             else {
@@ -44,7 +47,7 @@ function onFrame() {
 }
 
 function onMessage(message) {
-    print(message);
+    print("Received: "+message);
     history.push(message);
     if (name.length < 2) {
         name = message.split(":")[1];
