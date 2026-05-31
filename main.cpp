@@ -49,7 +49,6 @@ void create_template(const char *projectName) {
 int main(const int argc, char **argv) {
     js_State *runtime = js_newstate(nullptr, nullptr, 0);
     setupRaylibFuncs(runtime);
-
     std::string scriptPath = "script.js";
     if (argc > 1) scriptPath = argv[1];
 

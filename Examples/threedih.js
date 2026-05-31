@@ -10,6 +10,7 @@ var blockPos = {x: 6, y: 3, z: 8};
 var iTime;
 var blockCol = {r: 255, g: 255, b: 255, a: 255};
 var WHITE = {r: 255, g: 255, b: 255, a: 255};
+var PINK = {r: 255, g: 10, b: 255, a: 255};
 var BLACK = {r: 0, g: 0, b: 0, a: 255};
 
 var distance;
@@ -27,7 +28,6 @@ function onStart() {
     _rotation = 0;
     delta = .016;
     SetTargetFPS(100);
-
 }
 
 function onReady() {
@@ -35,9 +35,7 @@ function onReady() {
     print("Ready");
 }
 
-
 print("Hot reload");
-
 
 function onFrame() {
     delta = GetFrameTime();
@@ -67,7 +65,6 @@ function onFrame() {
             rotation-=GetMouseDeltaX()*.01;
             camera.position.y += GetMouseDeltaY()*.1;
         }
-
 
         //DrawGrid(100, 5);
         for (var y = 0; y < 20; y++) {
