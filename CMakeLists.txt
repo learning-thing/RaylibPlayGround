@@ -5,7 +5,7 @@ set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_CXX_STANDARD 20)
 
 #add_compile_definitions(GRAPHICS_API_OPENGL_21)
-
+#remove_definitions(GRAPHICS_API_OPENGL_33)
 
 include_directories(include vendor/mujs vendor/GameNetworkingSockets/include/steam)
 
@@ -13,7 +13,9 @@ add_subdirectory(vendor/raylib_git)
 #add_subdirectory(vendor/GameNetworkingSockets)
 
 add_executable(RaylibPlayGround main.cpp include/jsFuncs.hpp
-        include/multiPlayer.hpp)
+        include/multiPlayer.hpp
+        include/jsShader.cpp
+        include/jsShader.hpp)
 
 
 

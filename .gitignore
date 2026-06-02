@@ -9,3 +9,6 @@ vendor/mujs/build
 /docs/.obsidian/
 /docs/.obsidian/*
 /qodana.yaml
+*callgrind*
+*.out.*
+*screenshot*

@@ -47,6 +47,15 @@ GetMouseDeltaX();
 
 // Get the mouse position y delta
 GetMouseDeltaY();
+
+// Check if a mouse button is down (0 - left, 1 - right, middle - 2 etc.)
+GetMouseButtonDown();
+
+// Check if a mouse button is pressed (0 - left, 1 - right, middle - 2 etc.)
+GetMouseButtonDown();
+
+// Get the rotation of the mouseWheel
+GetMouseWheelMove();
 ```
 
 # Drawing
@@ -82,6 +91,24 @@ SetFont(path: String);
 
 //End the Drawloop
 EndDrawing();
+
+//##################### Shaders
+// Load a shader, returns a shader
+LoadShader(vertexFilePath: String, fragmentFilePath: String);
+
+// Start using a shader
+BeginShader(shader: Shader);
+
+// Stop active shader
+EndShader();
+
+// Get the location of a shader uniform
+GetUniformLocation(shader: Shader, uniformName: String);
+
+// Set a uniform of type Number (float)
+SetUniformf(value: Number);
+//##################### Shaders
+
 ```
 
 

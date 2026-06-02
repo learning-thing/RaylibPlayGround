@@ -1,12 +1,7 @@
-var camera = {
-    position: {x: 10, y: 20, z: 30},
-    target: {x: 0, y: 0, z: 0},
-    up: {x: 0, y: 1, z: 0},
-    fovy: 60,
-}
+var camera;
 
 var blockPos = {x: 6, y: 3, z: 8};
-
+var shader;
 var iTime;
 var blockCol = {r: 255, g: 255, b: 255, a: 255};
 var WHITE = {r: 255, g: 255, b: 255, a: 255};
@@ -30,16 +25,31 @@ function onStart() {
     SetTargetFPS(100);
 }
 
+var myUniform;
+
 function onReady() {
     //SetTargetFPS(100);
     print("Ready");
+    shader = LoadShader("Shader/baseVS.glsl", "Shader/baseFS.glsl");
+    myUniform = GetUniformLocation(shader, "iTime");
+    camera = {
+        position: {x: 10, y: 20, z: 30},
+        target: {x: 0, y: 0, z: 0},
+        up: {x: 0, y: 1, z: 0},
+        fovy: 60,
+    }
 }
 
 print("Hot reload");
 
+SetTargetFPS(60);
+
 function onFrame() {
     delta = GetFrameTime();
     iTime += delta;
+
+    SetUniform(shader, myUniform, iTime);
+
     if (IsKeyDown("up")) {
         distance-=delta*100;
     }
@@ -52,7 +62,9 @@ function onFrame() {
     if (IsKeyDown("left")) {
         rotation-=delta;
     }
-    _distance += (distance-_distance)*delta*2;
+
+    distance -= GetMouseWheelMove()*2;
+    _distance += (distance-_distance)*delta*10;
     _rotation += (rotation-_rotation)*delta*2;
     camera.position.x = sin(_rotation)*_distance;
     camera.position.z = cos(_rotation)*_distance;
@@ -61,8 +73,9 @@ function onFrame() {
     DrawFPS(10, 10);
         BeginMode3D(camera);
 
-        if (IsKeyDown("space")) {
-            rotation-=GetMouseDeltaX()*.01;
+        BeginShader(shader);
+        if (IsMouseButtonDown(0)) {
+            rotation -= GetMouseDeltaX()*.003;
             camera.position.y += GetMouseDeltaY()*.1;
         }
 
@@ -80,6 +93,7 @@ function onFrame() {
                 DrawCube(blockPos, 3, 3, 3, (y % 2) ? BLACK : WHITE);
             }
         }
+        EndShader();
         EndMode3D();
     EndDrawing();
 }

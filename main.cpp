@@ -33,7 +33,7 @@ void create_template(const char *projectName) {
 "function onReady() {}\n"
 "function onFrame() {\n"
 "    BeginDrawing();\n"
-"    ClearBackground();\n"
+"    ClearBackground({r: 0, g: 0, b: 0, a: 255});\n"
 "    //DrawFPS(10, 10);\n"
 "    if (player.x >= GetScreenWidth()) { velocity.x *= -1; }\n"
 "    if (player.y >= GetScreenHeight()) { velocity.y *= -1; }\n"
@@ -64,18 +64,25 @@ int main(const int argc, char **argv) {
 #ifdef multiplayer
     if (!g_headLessMode)
 #endif
-        InitWindow(1080, 720, "Hello world");
+    InitWindow(1080, 720, "Hello world");
 
     // Onready function (after window creation)
     js_dostring(runtime, "onReady();");
     size_t fileModTime = GetFileModTime(scriptPath.c_str());
+    
     while (!WindowShouldClose() || g_headLessMode) {
         //Hot reload
         if (GetFileModTime(scriptPath.c_str()) != fileModTime) {
-            js_dofile(runtime, scriptPath.c_str());
+            std::cout << (js_dofile(runtime, scriptPath.c_str()) ? "True" : "False") << std::endl;
+
             fileModTime = GetFileModTime(scriptPath.c_str());
         }
-        js_dostring(runtime, "onFrame();");
+
+        if (js_dostring(runtime, "onFrame();")) {
+            js_dofile(runtime, scriptPath.c_str());
+            //std::cout << "Error" << std::endl;
+        }
+        //js_dostring(runtime, "onFrame();");
 
 #ifdef multiplayer
         // Networking update

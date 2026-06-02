@@ -11,6 +11,8 @@
 #include <vector>
 #include <unordered_map>
 #include <cstring>
+
+#include "jsShader.hpp"
 #ifdef multiplayer
 #include <multiPlayer.hpp>
 #endif
@@ -158,12 +160,11 @@ jsFunc (jsIsKeyPressed) {
 }
 jsFunc(jsGetMouseX) { js_pushnumber(J, GetMouseX()); }
 jsFunc(jsGetMouseY) { js_pushnumber(J, GetMouseY()); }
-jsFunc(jsGetMouseDeltaX) {
-    js_pushnumber(J, GetMouseDelta().x);
-}
-jsFunc(jsGetMouseDeltaY) {
-    js_pushnumber(J, GetMouseDelta().y);
-}
+jsFunc(jsGetMouseDeltaX) { js_pushnumber(J, GetMouseDelta().x); }
+jsFunc(jsGetMouseDeltaY) { js_pushnumber(J, GetMouseDelta().y); }
+jsFunc(jsIsMouseButtonDown) { js_pushboolean(J, IsMouseButtonDown(js_tonumber(J, 1))); }
+jsFunc(jsIsMouseButtonPressed) { js_pushboolean(J, IsMouseButtonPressed(js_tonumber(J, 1))); }
+jsFunc(jsGetMouseWheelMove) { js_pushnumber(J, GetMouseWheelMove()); }
 
     // DrawText("text", x, y, fontsize, COLOR);
 jsFunc(jsDrawText) {
@@ -254,7 +255,7 @@ jsFunc(jsMaximizeWindow) {
  * - Add a onTick() function to the runtime, that gets called every physics/networkFrame
  */
 
-static std::vector<Shader> shaders;
+static std::vector<jsShader> shaders;
 
 #ifdef multilayer
 inline networkingMode_t g_eNetMode = NETWORK_MODE_SINGLEPLAYER;
@@ -310,19 +311,41 @@ jsFunc(jsDrawGrid) {
 }
 
 jsFunc(jsLoadShader) {
-    shaders.push_back(LoadShader(js_tostring(J, 1), js_tostring(J, 2)));
-    js_pushnumber(J, static_cast<double>(shaders.size()));
+    const size_t s = static_cast<double>(shaders.size());
+    shaders.emplace_back(js_tostring(J, 1), js_tostring(J, 2));
+    js_pushnumber(J, s);
 }
 
 jsFunc(jsBeginShader) {
-    BeginShaderMode(shaders[js_tointeger(J, 1)]);
+    shaders[js_tointeger(J, 1)].begin();
 }
 
 jsFunc(jsEndShader) {
     EndShaderMode();
 }
 
+jsFunc(jsGetShaderLoc) {
+    const char *name = js_tostring(J, 2);
+    std::cout << "Shader location of " << name << " is ";
+
+    js_pushnumber(J, shaders[js_tointeger(J, 1)].getUniformLoc(name));
+}
+
 jsFunc(jsSetUniform) {
+    //js_typeof()
+    switch (js_typeof(J, 3)[0]) {
+        case 'n': {
+            const jsShader &shader = shaders[js_tointeger(J, 1)];
+            const int location = js_tointeger(J, 2);
+            const float value = static_cast<float>(js_tonumber(J, 3));
+            shader.setUniform(location, value);
+            //std::cout << "uniform " << location << " of shader " << js_tointeger(J, 1) << " set to " << value << std::endl;
+            break;
+        }
+        default:
+            std::cerr << "Unhandled Uniform type: " << js_typeof(J, 3) << std::endl;
+            break;
+    }
 
 }
 
@@ -372,8 +395,8 @@ jsFunc(jsDrawCube) {
 
 jsFunc(jsDrawCubeWires) {
     // Get the color from an object
-    const unsigned int argPos = 1;
-    const unsigned int argCount = 5;
+    constexpr unsigned int argPos = 1;
+    constexpr unsigned int argCount = 5;
 
     assert(js_hasproperty(J, argPos, "x"));
     js_getproperty(J, argPos, "x");
@@ -449,6 +472,7 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsSetWindowTitle, "SetWindowTitle");
     js_addFunc(jsCloseWindow, "CloseWindow");
 
+    //inputn allat
     js_addFunc(jsGetCharPressed, "GetCharPressed");
     js_addFunc(jsIsKeyDown, "IsKeyDown");
     js_addFunc(jsIsKeyPressed, "IsKeyPressed");
@@ -456,6 +480,9 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsGetMouseY, "GetMouseY");
     js_addFunc(jsGetMouseDeltaX, "GetMouseDeltaX");
     js_addFunc(jsGetMouseDeltaY, "GetMouseDeltaY");
+    js_addFunc(jsIsMouseButtonDown, "IsMouseButtonDown");
+    js_addFunc(jsIsMouseButtonPressed, "IsMouseButtonPressed");
+    js_addFunc(jsGetMouseWheelMove, "GetMouseWheelMove");
 
     //Draw stuff
     js_addFunc(jsDrawCircle, "DrawCircle");
@@ -467,8 +494,11 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsDrawCube, "DrawCube");
     js_addFunc(jsDrawCubeV, "DrawCubeV");
     js_addFunc(jsDrawCubeWires, "DrawCubeWires");
+
     // - Shader
     js_addFunc(jsLoadShader, "LoadShader");
+    js_addFunc(jsGetShaderLoc, "GetUniformLocation");
+    js_addFunc(jsSetUniform, "SetUniform");//Later add other types
     js_addFunc(jsBeginShader, "BeginShader");
     js_addFunc(jsEndShader, "EndShader");
 

@@ -86,7 +86,7 @@ function onFrame() {
     ball.y += velocity.y  * levelMult * delta;
 
     BeginDrawing();
-    ClearBackground();
+    ClearBackground({r: 255, g: 255, b: 255, a: 255});
     DrawFPS(GetScreenWidth() / 2 + 5, 10);
     //SetTargetFPS(30);
 
