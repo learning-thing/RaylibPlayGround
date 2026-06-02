@@ -22,6 +22,12 @@ ninja -j 4
 # Running
 Simply run `./RaylibPlayGround` or `./RaylibPlayGround [arg]`, to use [arg] as the script to run.
 
+# Multiplayer
+Unfortunately I struggled to compile the windows version and even though I hate windows I wanted to keep it crossplatform so
+even though I had some basics already working (the chat app for example). 
+SteamGameNetworkingSockets also introduced alot of runtime library dependencies and made compiling a littly more annoying
+I will delay multiplayer until I can actually maintain it. 
+
 # Libraries used
 - Raylib
 - MuJS
