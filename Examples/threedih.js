@@ -38,11 +38,11 @@ function onReady() {
         up: {x: 0, y: 1, z: 0},
         fovy: 60,
     }
+    SetWindowTitle("Shader fun");
 }
 
 print("Hot reload");
 
-SetTargetFPS(60);
 
 function onFrame() {
     delta = GetFrameTime();
@@ -75,7 +75,7 @@ function onFrame() {
 
         BeginShader(shader);
         if (IsMouseButtonDown(0)) {
-            rotation -= GetMouseDeltaX()*.003;
+            rotation -= GetMouseDeltaX()*.006;
             camera.position.y += GetMouseDeltaY()*.1;
         }
 

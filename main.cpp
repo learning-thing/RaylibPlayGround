@@ -7,6 +7,8 @@
 #include <jsFuncs.hpp>
 #include <chrono>
 #include <multiPlayer.hpp>
+#include <string>
+
 
 using namespace std::chrono_literals;
 
@@ -78,11 +80,7 @@ int main(const int argc, char **argv) {
             fileModTime = GetFileModTime(scriptPath.c_str());
         }
 
-        if (js_dostring(runtime, "onFrame();")) {
-            js_dofile(runtime, scriptPath.c_str());
-            //std::cout << "Error" << std::endl;
-        }
-        //js_dostring(runtime, "onFrame();");
+        js_dostring(runtime, "onFrame();");
 
 #ifdef multiplayer
         // Networking update

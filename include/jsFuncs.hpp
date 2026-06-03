@@ -326,9 +326,10 @@ jsFunc(jsEndShader) {
 
 jsFunc(jsGetShaderLoc) {
     const char *name = js_tostring(J, 2);
-    std::cout << "Shader location of " << name << " is ";
+    const int loc = shaders[js_tointeger(J, 1)].getUniformLoc(name);
+    std::cout << "Shader location of " << name << " is " << loc;
 
-    js_pushnumber(J, shaders[js_tointeger(J, 1)].getUniformLoc(name));
+    js_pushnumber(J, loc);
 }
 
 jsFunc(jsSetUniform) {

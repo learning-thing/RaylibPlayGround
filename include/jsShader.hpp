@@ -59,13 +59,15 @@ inline const char *baseVertexShader =
 
 class jsShader {
     Shader m_sShader;
-    size_t fileModTime;
+    size_t fsFileModTime;
+    size_t vsFileModTime;
     const char *m_sVertexPath;
     const char *m_sFragmentPath;
     void reload();
 public:
     jsShader(const char *vertexPath, const char *fragmentPath) : m_sShader(LoadShader(vertexPath, fragmentPath)), m_sVertexPath(vertexPath), m_sFragmentPath(fragmentPath) {
-        fileModTime = GetFileModTime(fragmentPath);
+        fsFileModTime = GetFileModTime(fragmentPath);
+        vsFileModTime = GetFileModTime(vertexPath);
     }
     int getUniformLoc(const char *name) const;
     void setUniform(int loc, float a) const;

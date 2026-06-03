@@ -11,12 +11,15 @@ int jsShader::getUniformLoc(const char *name) const {
 }
 
 void jsShader::begin() {
-    const auto nowModTime = GetFileModTime(m_sFragmentPath);
+    const auto fsNowModTime = GetFileModTime(m_sFragmentPath);
+    const auto vsNowModTime = GetFileModTime(m_sVertexPath);
+
     // std::cout << nowModTime << std::endl;
-    if (fileModTime != nowModTime) {
+    if (fsFileModTime != fsNowModTime || vsFileModTime != vsNowModTime) {
         reload();
         std::cout << "Shader reload" << std::endl;
-        fileModTime = nowModTime;
+        fsFileModTime = fsNowModTime;
+        vsFileModTime = vsNowModTime;
     }
     BeginShaderMode(m_sShader);
 }

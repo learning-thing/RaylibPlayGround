@@ -24,7 +24,7 @@ void main()  {
     // Texel color fetching from texture sampler
     vec4 texelColor = texture(texture0, fragTexCoord);
 
-    const vec3 lightDir = vec3(-.6, -.4, -.2);
+    vec3 lightDir = vec3(-.6, -1, -.2);
 
     // basic view
     //finalColor = texelColor * colDiffuse * fragColor;
@@ -33,7 +33,9 @@ void main()  {
     //finalColor = vec4( fragNormal.xyz, 1);
 
     // basic lighting view
-    finalColor = vec4( fragColor.xyz - dot(fragNormal, lightDir)*.1, 1);
+    finalColor = vec4( fragColor.xyz - dot(fragNormal, lightDir)*.3, 1);
+    finalColor.b += (1+sin(fragPosition.z*.1+iTime))*.5;
+
 
     //ScreenSpace position
     //finalColor = vec4(screenCoord, 0, 1);

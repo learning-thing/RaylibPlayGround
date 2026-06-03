@@ -134,6 +134,9 @@ Rewind(file: Number);
 # Networking
 (Read docs/Networking for more details)
 ```js
+// Compile with the multiplayer compiler definition defined for multiplayer
+// and uncomment GNS in the CMakeLists.txt
+
 
 // Host a server using the given port eg.: 6767
 Host(port: Number);
