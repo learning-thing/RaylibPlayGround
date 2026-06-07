@@ -13,6 +13,7 @@ var _distance;
 var rotation;
 var _rotation;
 var delta;
+var yaw;
 
 function onStart() {
     print("Starting");
@@ -22,6 +23,7 @@ function onStart() {
     rotation = 0;
     _rotation = 0;
     delta = .016;
+    yaw = 0;
     SetTargetFPS(100);
 }
 
@@ -43,7 +45,6 @@ function onReady() {
 
 print("Hot reload");
 
-
 function onFrame() {
     delta = GetFrameTime();
     iTime += delta;
@@ -61,7 +62,7 @@ function onFrame() {
     }
     if (IsKeyDown("left")) {
         rotation-=delta;
-    }
+	}
 
     distance -= GetMouseWheelMove()*2;
     _distance += (distance-_distance)*delta*10;
@@ -78,22 +79,26 @@ function onFrame() {
             rotation -= GetMouseDeltaX()*.006;
             camera.position.y += GetMouseDeltaY()*.1;
         }
-
         //DrawGrid(100, 5);
+        var xDist = 6;//6
+        var zDist = 3;//3
+        var offset = -20;
+        var amplitude = 2;
         for (var y = 0; y < 20; y++) {
             for (var i = 0; i < 10; i++) {
-                blockPos.y = sin(iTime+y*.5+i*.5)*2;
-                blockPos.x = -20+3+6*i;
-                blockPos.z = -30+3*y;
+                blockPos.y = sin(iTime+y*.5+i*.5)*amplitude;
+                blockPos.x = offset+3+xDist*i;
+                blockPos.z = -30+zDist*y;
                 DrawCube(blockPos, 3, 3, 3, (y % 2) ? WHITE : BLACK);
             }
             for (var i = 0; i < 10; i++) {
-                blockPos.y = sin(iTime+y*.5+i*.5-.25)*2;
-                blockPos.x = -20+6*i;
+                blockPos.y = sin(iTime+y*.5+i*.5-.25)*amplitude;
+                blockPos.x = offset+xDist*i;
                 DrawCube(blockPos, 3, 3, 3, (y % 2) ? BLACK : WHITE);
             }
         }
         EndShader();
         EndMode3D();
-    EndDrawing();
+        DrawCircle(10, 10, 10, {x: 10, y: 10, z: 10});
+	EndDrawing();
 }

@@ -15,7 +15,8 @@ add_subdirectory(vendor/raylib_git)
 add_executable(RaylibPlayGround main.cpp include/jsFuncs.hpp
         include/multiPlayer.hpp
         include/jsShader.cpp
-        include/jsShader.hpp)
+        include/jsShader.hpp
+        include/templates.hpp)
 
 
 

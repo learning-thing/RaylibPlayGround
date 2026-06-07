@@ -5,12 +5,13 @@
 #ifndef RAYLIBPLAYGROUND_JSFUNCS_HPP
 #define RAYLIBPLAYGROUND_JSFUNCS_HPP
 
-#include <assert.h>
+#include <cassert>
 #include <raylib.h>
 #include <cmath>
 #include <vector>
 #include <unordered_map>
 #include <cstring>
+#include <map>
 
 #include "jsShader.hpp"
 #ifdef multiplayer
@@ -33,15 +34,15 @@ static std::unordered_map<std::string, size_t> fileNameMap;
 static Vector3 js_toVec3(js_State *J, const unsigned short argPos) {
     // Get the color from an object
     js_getproperty(J, argPos, "x");
-    const auto x = static_cast<float>(js_tonumber(J, argPos + 1));
+    const auto x = static_cast<float>(js_tonumber(J, js_gettop(J)-1));
     js_pop(J, 1);
 
     js_getproperty(J, argPos, "y");
-    const auto y = static_cast<float>(js_tonumber(J, argPos + 1));
+    const auto y = static_cast<float>(js_tonumber(J, js_gettop(J)-1));
     js_pop(J, 1);
 
     js_getproperty(J, argPos, "z");
-    const auto z = static_cast<float>(js_tonumber(J, argPos + 1));
+    const auto z = static_cast<float>(js_tonumber(J, js_gettop(J)-1));
     js_pop(J, 1);
 
     return {x, y, z};
@@ -83,7 +84,7 @@ static Camera3D js_toCamera(js_State *J, const unsigned short argPos) {
     js_pop(J, 1);
 
     js_getproperty(J, argPos, "fovy");
-    const float fov = static_cast<float>(js_tonumber(J, argPos+1));
+    const auto fov = static_cast<float>(js_tonumber(J, argPos+1));
     js_pop(J, 1);
 
     return {position, target, up, fov, CAMERA_PERSPECTIVE};
@@ -168,7 +169,8 @@ jsFunc(jsGetMouseWheelMove) { js_pushnumber(J, GetMouseWheelMove()); }
 
     // DrawText("text", x, y, fontsize, COLOR);
 jsFunc(jsDrawText) {
-    DrawTextEx(defaultFont, js_tostring(J, 1), {static_cast<float>(js_tonumber(J, 2)), static_cast<float>(js_tonumber(J, 3))}, static_cast<float>(js_tonumber(J, 4)), 1, js_toColor(J, 5)); js_pop(J, 5);
+    DrawTextEx(defaultFont, js_tostring(J, 1), {static_cast<float>(js_tonumber(J, 2)), static_cast<float>(js_tonumber(J, 3))}, static_cast<float>(js_tonumber(J, 4)), 1, js_toColor(J, 5));
+    js_pop(J, 5);
 }
 
 //OpenFile(filename: str)
@@ -327,7 +329,7 @@ jsFunc(jsEndShader) {
 jsFunc(jsGetShaderLoc) {
     const char *name = js_tostring(J, 2);
     const int loc = shaders[js_tointeger(J, 1)].getUniformLoc(name);
-    std::cout << "Shader location of " << name << " is " << loc;
+    std::cout << "Shader location of " << name << " is " << loc << std::endl;
 
     js_pushnumber(J, loc);
 }
@@ -338,7 +340,7 @@ jsFunc(jsSetUniform) {
         case 'n': {
             const jsShader &shader = shaders[js_tointeger(J, 1)];
             const int location = js_tointeger(J, 2);
-            const float value = static_cast<float>(js_tonumber(J, 3));
+            const auto value = static_cast<float>(js_tonumber(J, 3));
             shader.setUniform(location, value);
             //std::cout << "uniform " << location << " of shader " << js_tointeger(J, 1) << " set to " << value << std::endl;
             break;
@@ -347,7 +349,31 @@ jsFunc(jsSetUniform) {
             std::cerr << "Unhandled Uniform type: " << js_typeof(J, 3) << std::endl;
             break;
     }
+}
 
+inline std::map<std::string, Texture> images;
+
+jsFunc(jsDrawImage) {
+    const std::string imgPath = js_tostring(J, 1);
+    const auto x      = static_cast<float>(js_tonumber(J, 2));
+    const auto y      = static_cast<float>(js_tonumber(J, 3));
+    const auto width  = static_cast<float>(js_tonumber(J, 4));
+    const auto height = static_cast<float>(js_tonumber(J, 5));
+
+    //If that image has already been loaded
+    if (images.contains(imgPath)) {
+        //images[imgPath], {0, 0, width, height}, {x, y}, WHITE
+        if (width == 0.0f) {
+            DrawTexturePro(images[imgPath], {0, 0, static_cast<float>(images[imgPath].width), static_cast<float>(images[imgPath].width)}, {x, y, (float)images[imgPath].width, (float)images[imgPath].height}, {0, 0}, 0, WHITE);
+        } else {
+            DrawTexturePro(images[imgPath], {0, 0, static_cast<float>(images[imgPath].width), static_cast<float>(images[imgPath].width)}, {x, y, width, height}, {0, 0}, 0, WHITE);
+        }
+    } else {
+        //Load the image
+        const Image img = LoadImage(imgPath.c_str());
+        images.emplace(imgPath, LoadTextureFromImage(img));
+        UnloadImage(img);
+    }
 }
 
 jsFunc(jsDrawCube) {
@@ -368,7 +394,7 @@ jsFunc(jsDrawCube) {
     js_getproperty(J, argPos, "z");
     const float z = js_tonumber(J, js_gettop(J)-1);
 
-    const float width = js_tonumber(J, 2);
+    const float width  = js_tonumber(J, 2);
     const float height = js_tonumber(J, 3);
     const float length = js_tonumber(J, 4);
 
@@ -449,6 +475,10 @@ jsFunc(jsCloseWindow) {
     CloseWindow();
 }
 
+jsFunc(jsResizeWindow) {
+    SetWindowSize(js_tonumber(J, 1), js_tonumber(J, 2));
+}
+
 inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsPrint, "print");
     js_addFunc(jsBeginDrawing, "BeginDrawing");
@@ -490,6 +520,8 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsDrawRectangle, "DrawRectangle");
     js_addFunc(jsDrawRectangleLines, "DrawRectangleLines");
     js_addFunc(jsDrawText, "DrawText");
+    js_addFunc(jsDrawImage, "DrawImage");
+
     // - 3D
     js_addFunc(jsDrawGrid, "DrawGrid");
     js_addFunc(jsDrawCube, "DrawCube");

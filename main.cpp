@@ -8,45 +8,9 @@
 #include <chrono>
 #include <multiPlayer.hpp>
 #include <string>
-
+#include <templates.hpp>
 
 using namespace std::chrono_literals;
-
-// later create a template
-void create_template(const char *projectName) {
-    std::ofstream script(projectName);
-    script <<
-"var player;\nvar velocity;\n"
-"var circleColor = {\n"
-"   r: 50,\n"
-"   g: 50,\n"
-"   b: 255,\n"
-"   a: 255\n"
-"};\n\n"
-"velocity = { x: 200, y: 200 }\n\n"
-"function onStart() {\n"
-"   x = 60;\n"
-"   y = 60;\n\n"
-"   print(\"Starting\");\n"
-"   SetTargetFPS(60);\n"
-"   \n"
-"   player   = { x: 0, y: 0 }\n"
-"}\n\n"
-"function onReady() {}\n"
-"function onFrame() {\n"
-"    BeginDrawing();\n"
-"    ClearBackground({r: 0, g: 0, b: 0, a: 255});\n"
-"    //DrawFPS(10, 10);\n"
-"    if (player.x >= GetScreenWidth()) { velocity.x *= -1; }\n"
-"    if (player.y >= GetScreenHeight()) { velocity.y *= -1; }\n"
-"    if (player.x <= 0) { velocity.x *= -1; }\n"
-"    if (player.y <= 0) { velocity.y *= -1; }\n"
-"    player.x += velocity.x * GetFrameTime();\n"
-"    player.y += velocity.y * GetFrameTime();\n"
-"    DrawCircle(player.x, player.y, 20, circleColor);\n"
-"    EndDrawing();\n"
-"}\n";
-}
 
 int main(const int argc, char **argv) {
     js_State *runtime = js_newstate(nullptr, nullptr, 0);
@@ -54,7 +18,10 @@ int main(const int argc, char **argv) {
     std::string scriptPath = "script.js";
     if (argc > 1) scriptPath = argv[1];
 
-    if (!std::filesystem::exists(scriptPath)) create_template(scriptPath.c_str());
+    //Create a script template
+    if (!std::filesystem::exists(scriptPath)) create_script_template(scriptPath.c_str());
+    //Create the function declerations
+    if (!std::filesystem::exists(".d.ts")) create_dts_template();
     if (js_dofile(runtime, scriptPath.c_str())) {
         std::cerr << "Error while running script\n";
         return -1;
@@ -75,13 +42,11 @@ int main(const int argc, char **argv) {
     while (!WindowShouldClose() || g_headLessMode) {
         //Hot reload
         if (GetFileModTime(scriptPath.c_str()) != fileModTime) {
-            std::cout << (js_dofile(runtime, scriptPath.c_str()) ? "True" : "False") << std::endl;
-
+            // std::cout << (js_dofile(runtime, scriptPath.c_str()) ? "True" : "False") << std::endl;
             fileModTime = GetFileModTime(scriptPath.c_str());
         }
 
         js_dostring(runtime, "onFrame();");
-
 #ifdef multiplayer
         // Networking update
         std::string onMsgCall = "onMessage(\"";
