@@ -48,16 +48,15 @@ int main(const int argc, char **argv) {
     skyParams.sunEnergy = 0.5f;
     const R3D_Cubemap cubemap = R3D_LoadCubemap("/home/benji/CLionProjects/RaylibPlayGround/Examples/models/citrus_orchard_puresky_2k.hdr", R3D_CUBEMAP_LAYOUT_AUTO_DETECT);
     //const R3D_Cubemap skyProcedural = R3D_GenProceduralSky(512, skyParams);
-    R3D_ENVIRONMENT_SET(tonemap.white, 4.0f);
+    R3D_GetEnvironment()->tonemap.white = 4.0f;
 
     const R3D_Light light = R3D_CreateLight(R3D_LIGHT_DIR);
 
     R3D_SetLightDirection(light, (Vector3) {1, -1, 1});
     R3D_SetLightActive(light, true);
 
-    //R3D_ENVIRONMENT_SET(background.color, (Color){0, 0, 255, 255});
-    //R3D_ENVIRONMENT_SET(background.sky, skyProcedural);
-    R3D_ENVIRONMENT_SET(background.sky, cubemap);
+    //R3D_ENVIRONMENT_SET(background.sky, cubemap);
+    R3D_GetEnvironment()->background.sky = cubemap;
 
     // Setup environment ambient
     const R3D_AmbientMap ambientMap = R3D_GenAmbientMap(cubemap, R3D_AMBIENT_ILLUMINATION | R3D_AMBIENT_REFLECTION);

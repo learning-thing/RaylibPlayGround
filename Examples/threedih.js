@@ -45,14 +45,12 @@ function onReady() {
     blockPos = {x: 6, y: 3, z: 8}
     SetWindowTitle("Shader fun");
     mclaren = LoadModel("models/toyota_gr_gt.glb");
-    OpenSerial("/dev/ttyUSB0", 9600);
     AllowWindowResize();
 }
 
 Print("Hot reload ");
 //SetTargetFPS(100);
 
-var a = 0;
 function onFrame() {
     delta = GetFrameTime();
     iTime += delta;
@@ -66,13 +64,9 @@ function onFrame() {
     }
     if (IsKeyPressed("right")) {
         rotation+=delta*18;
-        a-=10;
-        WriteSerial(a);
     }
     if (IsKeyPressed("left")) {
         rotation-=delta*18;
-        a+=10;
-        WriteSerial(a);
 	}
 
     BeginDrawing();
