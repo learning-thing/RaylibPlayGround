@@ -1,12 +1,12 @@
 // print a message
-declare function print(message: string): void;
+declare function Print(message: string): void;
 
 // Beginning of the drawLoop
 declare function BeginDrawing(): void;
 // End of the DrawLoop
 declare function EndDrawing(): void;
 // Start 3d rendering mode
-declare function BeginMode3D(camera: object): void;
+declare function BeginMode3D(camera: { position: {x: number, y: number, z: number}, target: {x: number, y: number, z: number}, up: {x: number, y: number, z: number}, fovy: number }): void;
 // End 3d rendering mode
 declare function EndMode3D(): void;
 // Clear the background (normally at the beginning of the drawLoop)
@@ -18,9 +18,9 @@ declare function SetTargetFPS(fps: number);
 // Pause the application for a given time
 declare function Sleep(duration: number): void;
 // Get the sine
-declare function sin(x: number): number;
+declare function Sin(x: number): number;
 // Get the cosine
-declare function cos(x: number): number;
+declare function Cos(x: number): number;
 // Launch in headless mode (no rendering)
 declare function Headless(): void;
 // Get the frame time
@@ -35,6 +35,8 @@ declare function ResizeWindow(width: number, height: number): void;
 declare function MaximizeWindow(): void;
 // Set the title of the application window
 declare function SetWindowTitle(title: string): void;
+// Allow resizing
+declare function AllowWindowResize(): void;
 
 // Closes the window
 declare function CloseWindow(): void;
@@ -79,6 +81,12 @@ declare function DrawCube(position: object, width: number, height: number, lengt
 declare function DrawCubeV(): void;
 // Draw a 3D Cube (from vectors), just wires (broken)
 declare function DrawCubeWires(): void;
+// Load a 3D model
+declare function LoadModel(path: string): number;
+// Draw a mesh
+declare function DrawMesh(meshID: number): void;
+// Draw a model
+declare function DrawModel(meshID: number): void;
 // Load a shader from the files system, get back a shader id
 declare function LoadShader(vertexPath: string, fragmentPath: string): number;
 // Load a shaders Uniform location
@@ -110,3 +118,9 @@ declare function IsHosting(): boolean;
 declare function Host(address: string): void;
 // Send a message (server sends to all clients, clients send to the server)
 declare function SendMessage(message: string): void;
+
+// Open a serial port
+declare function OpenSerial(path: string, baurate: number): void;
+// Write a message to the opened serial port
+declare function WriteSerial(message: string): void;
+declare function WriteSerial(message: number): void;

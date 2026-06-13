@@ -7,7 +7,7 @@
 
 inline const char *dts =
 "// print a message\n"
-"declare function print(message: string): void;\n"
+"declare function Print(message: string): void;\n"
 "\n"
 "// Beginning of the drawLoop\n"
 "declare function BeginDrawing(): void;\n"
@@ -98,7 +98,8 @@ inline const char *dts =
 "declare function EndShader(): void;";
 
 inline const char *script_template_src =
-    "var player;\nvar velocity;\n"
+    "var player;\n"
+    "var velocity;\n"
     "var circleColor = {\n"
     "   r: 50,\n"
     "   g: 50,\n"
@@ -107,12 +108,10 @@ inline const char *script_template_src =
     "};\n\n"
     "velocity = { x: 200, y: 200 }\n\n"
     "function onStart() {\n"
-    "   x = 60;\n"
-    "   y = 60;\n\n"
-    "   print(\"Starting\");\n"
+    "   Print(\"Starting\");\n"
     "   SetTargetFPS(60);\n"
     "   \n"
-    "   player   = { x: 0, y: 0 }\n"
+    "   player = { x: 0, y: 0 }\n"
     "}\n\n"
     "function onReady() {}\n"
     "function onFrame() {\n"
