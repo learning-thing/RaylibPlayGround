@@ -3,6 +3,13 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/vendor/GameNetworkingSockets" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/vendor/GameNetworkingSockets/src/external/abseil" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/vendor/GameNetworkingSockets/src/external/vjson" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/vendor/GameNetworkingSockets/src/external/vjson/test/googletest" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/vendor/GameNetworkingSockets/src/external/webrtc" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/vendor/r3d" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/vendor/r3d/external/assimp" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/vendor/r3d/external/raylib" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/vendor/raylib_git" vcs="Git" />
   </component>
 </project>

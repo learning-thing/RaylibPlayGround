@@ -30,6 +30,7 @@ so I will delay multiplayer until I can actually maintain it.
 
 # Libraries used
 - Raylib
+- R3D
 - MuJS
 - SteamGameNetworkingSockets
 - (X11)

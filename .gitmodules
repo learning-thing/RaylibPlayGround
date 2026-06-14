@@ -4,3 +4,6 @@
 [submodule "vendor/GameNetworkingSockets"]
 	path = vendor/GameNetworkingSockets
 	url = https://github.com/ValveSoftware/GameNetworkingSockets
+[submodule "vendor/r3d"]
+	path = vendor/r3d
+	url = https://github.com/Bigfoot71/r3d

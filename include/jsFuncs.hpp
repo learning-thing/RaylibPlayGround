@@ -14,21 +14,35 @@
 #include <map>
 
 #include "jsShader.hpp"
+#include "serial.hpp"
+#include "../vendor/r3d/include/r3d/r3d_draw.h"
+#include "../vendor/r3d/include/r3d/r3d_lighting.h"
 #ifdef multiplayer
 #include <multiPlayer.hpp>
 #endif
 #include <bits/this_thread_sleep.h>
 
 #define jsFunc(name) static void name(js_State *J)
+#define js_addFunc(from) \
+js_newcfunction(runtime, from, & #from [2], 0); \
+js_setglobal(runtime, & #from [2])
 
+/*
 #define js_addFunc(from, to) \
 js_newcfunction(runtime, from, to, 0); \
 js_setglobal(runtime, to)
+*/
 
 inline bool g_headLessMode = false;
 
-static std::vector<std::pair<std::ifstream, std::string>> openFiles;
-static std::unordered_map<std::string, size_t> fileNameMap;
+inline std::vector<std::pair<std::ifstream, std::string>> openFiles;
+inline std::unordered_map<std::string, size_t> fileNameMap;
+
+// graphics stuff
+inline R3D_Material defaultMaterial;
+inline std::vector<R3D_Mesh> g_vR3DMeshes;
+inline std::vector<R3D_Light> g_vR3DLights;
+inline std::vector<R3D_Model> g_vModels;
 
 //Helper functions
 static Vector3 js_toVec3(js_State *J, const unsigned short argPos) {
@@ -116,7 +130,7 @@ jsFunc(jsHeadLessMode) { g_headLessMode = true; }
 jsFunc(jsPrint) { std::cout << js_tostring(J, 1) << std::endl; js_pop(J, 1); }
 jsFunc(jsBeginDrawing) { BeginDrawing(); }
 jsFunc(jsEndDrawing) { EndDrawing(); }
-jsFunc(jsClearBackGround) { ClearBackground(js_toColor(J, 1)); }
+jsFunc(jsClearBackground) { ClearBackground(js_toColor(J, 1)); }
 jsFunc(jsDrawCircle) {
     const int x = js_tointeger(J, 1);
     const int y = js_tointeger(J, 2);
@@ -135,6 +149,7 @@ jsFunc(jsCos) { js_pushnumber(J, cos(js_tonumber(J, 1))); }
 jsFunc(jsGetFrameTime) {js_pushnumber(J, GetFrameTime()); }
 jsFunc(jsGetScreenWidth) { js_pushnumber(J, GetScreenWidth()); }
 jsFunc(jsGetScreenHeight) { js_pushnumber(J, GetScreenHeight()); }
+jsFunc(jsAllowWindowResize) { SetWindowState(FLAG_WINDOW_RESIZABLE); }
 jsFunc(jsDrawRectangle) {
     DrawRectangle(js_tointeger(J, 1), js_tointeger(J, 2),js_tointeger(J, 3), js_tointeger(J, 4), js_toColor(J, 5) );
     js_pop(J, 5);
@@ -167,7 +182,11 @@ jsFunc(jsIsMouseButtonDown) { js_pushboolean(J, IsMouseButtonDown(js_tonumber(J,
 jsFunc(jsIsMouseButtonPressed) { js_pushboolean(J, IsMouseButtonPressed(js_tonumber(J, 1))); }
 jsFunc(jsGetMouseWheelMove) { js_pushnumber(J, GetMouseWheelMove()); }
 
-    // DrawText("text", x, y, fontsize, COLOR);
+jsFunc(jsDrawLine) {
+    DrawLine(js_tonumber(J, 1), js_tonumber(J, 2), js_tonumber(J, 3), js_tonumber(J, 4), js_toColor(J, 5));
+}
+
+// DrawText("text", x, y, fontsize, COLOR);
 jsFunc(jsDrawText) {
     DrawTextEx(defaultFont, js_tostring(J, 1), {static_cast<float>(js_tonumber(J, 2)), static_cast<float>(js_tonumber(J, 3))}, static_cast<float>(js_tonumber(J, 4)), 1, js_toColor(J, 5));
     js_pop(J, 5);
@@ -298,17 +317,18 @@ jsFunc(jsSleep) {
 //3D
 jsFunc(jsBeginMode3D) {
     const Camera3D cam = js_toCamera(J, 1);
-    BeginMode3D(cam);
+    R3D_Begin(cam);
 }
 
-inline void jsEndMode3D(js_State *J) {
-    EndMode3D();
+jsFunc(jsEndMode3D) {
+    R3D_End();
 }
 
 jsFunc(jsDrawGrid) {
     const int a = js_tointeger(J, 1);
     const int b = js_tointeger(J, 2);
     DrawGrid(a, b);
+
     js_pop(J, 2);
 }
 
@@ -381,7 +401,6 @@ jsFunc(jsDrawCube) {
     constexpr unsigned int argPos = 1;
     const unsigned int argCount = 5;
 
-    //TODO: Use js_gettop to get stuff
     assert(js_hasproperty(J, argPos, "x"));
     js_getproperty(J, argPos, "x");
     const float x = js_tonumber(J, js_gettop(J)-1);
@@ -417,7 +436,19 @@ jsFunc(jsDrawCube) {
 
     //std::cout << "Drawing cube" << std::endl;
     //std::cout << x << y << z << width << height << length;
-    DrawCube({x, y, z}, width, height, length, col);
+    //DrawCube({x, y, z}, width, height, length, col);
+    R3D_DrawMesh(g_vR3DMeshes[0], defaultMaterial, {x, y, z}, 10);
+}
+
+jsFunc(jsGenMeshCube) {
+    const auto s = g_vR3DMeshes.size();
+    g_vR3DMeshes.emplace_back(js_tonumber(J, 1), js_tonumber(J, 2), js_tonumber(J, 3));
+    js_pushnumber(J, s);
+}
+
+jsFunc(jsDrawMesh) {
+    const auto mesh = js_tonumber(J, 1);
+    R3D_DrawMesh(g_vR3DMeshes[mesh], defaultMaterial, {0, 0, 0}, 10);
 }
 
 jsFunc(jsDrawCubeWires) {
@@ -427,17 +458,17 @@ jsFunc(jsDrawCubeWires) {
 
     assert(js_hasproperty(J, argPos, "x"));
     js_getproperty(J, argPos, "x");
-    const float x = js_tonumber(J, argCount + 2);
+    const float x      = static_cast<float>(js_tonumber(J, argCount + 2));
 
     js_getproperty(J, argPos, "y");
-    const float y = js_tonumber(J, argCount + 3);
+    const float y      = static_cast<float>(js_tonumber(J, argCount + 3));
 
     js_getproperty(J, argPos, "z");
-    const float z = js_tonumber(J, argCount + 4);
+    const float z      = static_cast<float>(js_tonumber(J, argCount + 4));
 
-    const float width = js_tonumber(J, 2);
-    const float height = js_tonumber(J, 3);
-    const float length = js_tonumber(J, 4);
+    const float width  = static_cast<float>(js_tonumber(J, 2));
+    const float height = static_cast<float>(js_tonumber(J, 3));
+    const float length = static_cast<float>(js_tonumber(J, 4));
 
     Color col;
     assert(js_hasproperty(J, 5, "r"));
@@ -468,7 +499,14 @@ jsFunc(jsDrawCubeV) {
 
 //TODO: Load models into vec or something idk
 jsFunc(jsLoadModel) {
+    const auto id = g_vModels.size();
+    g_vModels.push_back(R3D_LoadModel(js_tostring(J, 1)));
+    js_pushnumber(J, id);
+}
 
+jsFunc(jsDrawModel) {
+    const auto modelID = js_tonumber(J, 1);
+    R3D_DrawModel(g_vModels[modelID], js_toVec3(J, 2), js_tonumber(J, 3));
 }
 
 jsFunc(jsCloseWindow) {
@@ -479,71 +517,126 @@ jsFunc(jsResizeWindow) {
     SetWindowSize(js_tonumber(J, 1), js_tonumber(J, 2));
 }
 
+inline Serial* serial = nullptr;
+
+//Serial stuff
+jsFunc(jsOpenSerial) {
+    const std::string a = js_tostring(J, 1);
+    const int baudrate = js_tointeger(J, 2);
+    serial = new Serial(a, baudrate);
+}
+
+jsFunc(jsReadSerial) {
+    if (serial) {
+        const std::string line = serial->readLineAsync();
+        if (!line.empty()) {
+            js_pushstring(J, line.c_str());
+        } else {
+            js_pushstring(J, "");
+        }
+    } else {
+        js_pushundefined(J);
+    }
+}
+
+jsFunc(jsWriteSerial) {
+    if (!serial) return;
+    if (js_typeof(J, 1)[0] == 'n')
+        serial->write(js_tointeger(J, 1));
+    else
+        serial->write(js_tostring(J, 1));
+}
+
+jsFunc(jsIsSerialOpen) {
+    if (!serial) {js_pushboolean(J, false); return; }
+    js_pushboolean(J, serial->isOpen());
+}
+
+jsFunc(jsSerialRetry) {
+    if (!serial) {std::cerr << "Serial was never opened!\n"; return; }
+    serial->retry();
+}
+
 inline void setupRaylibFuncs(js_State *runtime) {
-    js_addFunc(jsPrint, "print");
-    js_addFunc(jsBeginDrawing, "BeginDrawing");
-    js_addFunc(jsEndDrawing, "EndDrawing");
-    js_addFunc(jsBeginMode3D, "BeginMode3D");
-    js_addFunc(jsEndMode3D, "EndMode3D");
-    js_addFunc(jsClearBackGround, "ClearBackground");
-    js_addFunc(jsSetTargetFPS, "SetTargetFPS");
-    js_addFunc(jsSleep, "Sleep");
-    js_addFunc(jsDrawFPS, "DrawFPS");
+    js_addFunc(jsPrint);
+    js_addFunc(jsBeginDrawing);
+    js_addFunc(jsEndDrawing);
+    js_addFunc(jsBeginMode3D);
+    js_addFunc(jsEndMode3D);
+    js_addFunc(jsClearBackground);
+    js_addFunc(jsSetTargetFPS);
+    js_addFunc(jsSleep);
+    js_addFunc(jsDrawFPS);
 
     //Math'n'shit
-    js_addFunc(jsSin, "sin");
-    js_addFunc(jsCos, "cos");
+    js_addFunc(jsSin);
+    js_addFunc(jsCos);
 
     //window n shit
-    js_addFunc(jsHeadLessMode, "Headless");
-    js_addFunc(jsGetFrameTime, "GetFrameTime");
-    js_addFunc(jsGetScreenWidth, "GetScreenWidth");
-    js_addFunc(jsGetScreenHeight, "GetScreenHeight");
-    js_addFunc(jsMaximizeWindow, "MaximizeWindow");
-    js_addFunc(jsSetWindowTitle, "SetWindowTitle");
-    js_addFunc(jsCloseWindow, "CloseWindow");
+    js_addFunc(jsHeadLessMode);
+    js_addFunc(jsGetFrameTime);
+    js_addFunc(jsGetScreenWidth);
+    js_addFunc(jsGetScreenHeight);
+    js_addFunc(jsMaximizeWindow);
+    js_addFunc(jsSetWindowTitle);
+    js_addFunc(jsCloseWindow);
+    js_addFunc(jsAllowWindowResize);
 
     //inputn allat
-    js_addFunc(jsGetCharPressed, "GetCharPressed");
-    js_addFunc(jsIsKeyDown, "IsKeyDown");
-    js_addFunc(jsIsKeyPressed, "IsKeyPressed");
-    js_addFunc(jsGetMouseX, "GetMouseX");
-    js_addFunc(jsGetMouseY, "GetMouseY");
-    js_addFunc(jsGetMouseDeltaX, "GetMouseDeltaX");
-    js_addFunc(jsGetMouseDeltaY, "GetMouseDeltaY");
-    js_addFunc(jsIsMouseButtonDown, "IsMouseButtonDown");
-    js_addFunc(jsIsMouseButtonPressed, "IsMouseButtonPressed");
-    js_addFunc(jsGetMouseWheelMove, "GetMouseWheelMove");
+    js_addFunc(jsGetCharPressed);
+    js_addFunc(jsIsKeyDown);
+    js_addFunc(jsIsKeyPressed);
+    js_addFunc(jsGetMouseX);
+    js_addFunc(jsGetMouseY);
+    js_addFunc(jsGetMouseDeltaX);
+    js_addFunc(jsGetMouseDeltaY);
+    js_addFunc(jsIsMouseButtonDown);
+    js_addFunc(jsIsMouseButtonPressed);
+    js_addFunc(jsGetMouseWheelMove);
 
     //Draw stuff
-    js_addFunc(jsDrawCircle, "DrawCircle");
-    js_addFunc(jsDrawRectangle, "DrawRectangle");
-    js_addFunc(jsDrawRectangleLines, "DrawRectangleLines");
-    js_addFunc(jsDrawText, "DrawText");
-    js_addFunc(jsDrawImage, "DrawImage");
+    js_addFunc(jsDrawCircle);
+    js_addFunc(jsDrawRectangle);
+    js_addFunc(jsDrawRectangleLines);
+    js_addFunc(jsDrawText);
+    js_addFunc(jsDrawImage);
+    js_addFunc(jsDrawLine);
 
     // - 3D
-    js_addFunc(jsDrawGrid, "DrawGrid");
-    js_addFunc(jsDrawCube, "DrawCube");
-    js_addFunc(jsDrawCubeV, "DrawCubeV");
-    js_addFunc(jsDrawCubeWires, "DrawCubeWires");
+    js_addFunc(jsDrawGrid);
+    js_addFunc(jsDrawCube);
+    js_addFunc(jsDrawCubeV);
+    js_addFunc(jsDrawCubeWires);
+    js_addFunc(jsLoadModel);
+    js_addFunc(jsGenMeshCube);
+
+    //r3d
+    js_addFunc(jsDrawMesh);
+    js_addFunc(jsDrawModel);
 
     // - Shader
-    js_addFunc(jsLoadShader, "LoadShader");
-    js_addFunc(jsGetShaderLoc, "GetUniformLocation");
-    js_addFunc(jsSetUniform, "SetUniform");//Later add other types
-    js_addFunc(jsBeginShader, "BeginShader");
-    js_addFunc(jsEndShader, "EndShader");
+    js_addFunc(jsLoadShader);
+    js_addFunc(jsGetShaderLoc);
+    js_addFunc(jsSetUniform);
+    js_addFunc(jsBeginShader);
+    js_addFunc(jsEndShader);
 
-    //file reading
-    js_addFunc(jsGetFileModTime, "GetFileModTime");
-    js_addFunc(jsSetFont, "SetFont");
-    js_addFunc(jsOpenFile, "OpenFile");
-    js_addFunc(jsGetLine, "GetLine");
-    js_addFunc(jsAtEOF, "AtEOF");
-    js_addFunc(jsRewind, "Rewind");
+    // file reading
+    js_addFunc(jsGetFileModTime);
+    js_addFunc(jsSetFont);
+    js_addFunc(jsOpenFile);
+    js_addFunc(jsGetLine);
+    js_addFunc(jsAtEOF);
+    js_addFunc(jsRewind);
 
-    //networking & multiplayer
+    // Serial (wtf am I doing)
+    js_addFunc(jsOpenSerial);
+    js_addFunc(jsWriteSerial);
+    js_addFunc(jsIsSerialOpen);
+    js_addFunc(jsSerialRetry);
+    js_addFunc(jsReadSerial);
+
+    // networking & multiplayer
 #ifdef multiplayer
     js_addFunc(jsHost, "Host");
     js_addFunc(jsIsHosting, "IsHosting");

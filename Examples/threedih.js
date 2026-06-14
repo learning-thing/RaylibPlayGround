@@ -1,6 +1,6 @@
 var camera;
 
-var blockPos = {x: 6, y: 3, z: 8};
+var blockPos;
 var shader;
 var iTime;
 var blockCol = {r: 255, g: 255, b: 255, a: 255};
@@ -15,10 +15,18 @@ var _rotation;
 var delta;
 var yaw;
 
+var mclaren;
+
+/*
+* GR GT Model from: https://sketchfab.com/3d-models/toyota-gr-gt-9e25a389d96c41f6be2ee63c430d4c30
+*
+* */
+
+
 function onStart() {
-    print("Starting");
+    Print("Starting");
     iTime = 0;
-    distance = 50;
+    distance = 100;
     _distance = 0;
     rotation = 0;
     _rotation = 0;
@@ -31,74 +39,79 @@ var myUniform;
 
 function onReady() {
     //SetTargetFPS(100);
-    print("Ready");
-    shader = LoadShader("Shader/baseVS.glsl", "Shader/baseFS.glsl");
-    myUniform = GetUniformLocation(shader, "iTime");
+    //print("Ready");
+    //shader = LoadShader("Shader/baseVS.glsl", "Shader/baseFS.glsl");
+    //myUniform = GetUniformLocation(shader, "iTime");
     camera = {
         position: {x: 10, y: 20, z: 30},
         target: {x: 0, y: 0, z: 0},
         up: {x: 0, y: 1, z: 0},
-        fovy: 60,
+        fovy: 70,
     }
+    blockPos = {x: 6, y: 3, z: 8}
     SetWindowTitle("Shader fun");
+    mclaren = LoadModel("models/toyota_gr_gt.glb");
+    AllowWindowResize();
 }
 
-print("Hot reload");
+Print("Hot reload.");
+Print("Serial is "+(IsSerialOpen() ? "open" : "closed")+".")
+//SetTargetFPS(100);
 
 function onFrame() {
     delta = GetFrameTime();
     iTime += delta;
 
-    SetUniform(shader, myUniform, iTime);
-
+    //SetUniform(shader, myUniform, iTime);
     if (IsKeyDown("up")) {
         distance-=delta*100;
     }
     if (IsKeyDown("down")) {
         distance+=delta*100;
     }
-    if (IsKeyDown("right")) {
-        rotation+=delta;
+    if (IsKeyPressed("right")) {
+        rotation+=delta*18;
     }
-    if (IsKeyDown("left")) {
-        rotation-=delta;
+    if (IsKeyPressed("left")) {
+        rotation-=delta*18;
 	}
-
-    distance -= GetMouseWheelMove()*2;
-    _distance += (distance-_distance)*delta*10;
-    _rotation += (rotation-_rotation)*delta*2;
-    camera.position.x = sin(_rotation)*_distance;
-    camera.position.z = cos(_rotation)*_distance;
     BeginDrawing();
-    ClearBackground({r: 50, g: 50, b: 50, a: 255});
-    DrawFPS(10, 10);
+    //ClearBackground({r: 50, g: 50, b: 50, a: 255});
+        distance -= GetMouseWheelMove()*3;
+        _distance += (distance-_distance)*delta*10;
+        _rotation += (rotation-_rotation)*delta*10;
+        camera.position.x = Sin(_rotation)*_distance;
+        camera.position.z = Cos(_rotation)*_distance;
         BeginMode3D(camera);
 
-        BeginShader(shader);
+        //BeginShader(shader);
         if (IsMouseButtonDown(0)) {
             rotation -= GetMouseDeltaX()*.006;
-            camera.position.y += GetMouseDeltaY()*.1;
+            camera.position.y += GetMouseDeltaY()*.2;
         }
         //DrawGrid(100, 5);
         var xDist = 6;//6
         var zDist = 3;//3
         var offset = -20;
         var amplitude = 2;
+        /*
         for (var y = 0; y < 20; y++) {
             for (var i = 0; i < 10; i++) {
-                blockPos.y = sin(iTime+y*.5+i*.5)*amplitude;
+                blockPos.y = Sin(iTime+y*.5+i*.5) * amplitude;
                 blockPos.x = offset+3+xDist*i;
                 blockPos.z = -30+zDist*y;
                 DrawCube(blockPos, 3, 3, 3, (y % 2) ? WHITE : BLACK);
             }
             for (var i = 0; i < 10; i++) {
-                blockPos.y = sin(iTime+y*.5+i*.5-.25)*amplitude;
+                blockPos.y = Sin(iTime+y*.5+i*.5-.25) * amplitude;
                 blockPos.x = offset+xDist*i;
                 DrawCube(blockPos, 3, 3, 3, (y % 2) ? BLACK : WHITE);
             }
-        }
-        EndShader();
+        }*/
+        DrawModel(mclaren, {x: 7, y: 5, z: 0}, 30);
+        //EndShader();
         EndMode3D();
-        DrawCircle(10, 10, 10, {x: 10, y: 10, z: 10});
+        DrawFPS(10, 10);
+        //SetTargetFPS(0);
 	EndDrawing();
 }
