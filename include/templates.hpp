@@ -1,9 +1,7 @@
-//
-// Created by benji on 06.06.26.
-//
-
 #ifndef RAYLIBPLAYGROUND_TEMPLATES_HPP
 #define RAYLIBPLAYGROUND_TEMPLATES_HPP
+
+#include <iostream>
 
 inline const char *dts =
 "// print a message\n"

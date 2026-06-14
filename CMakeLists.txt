@@ -53,3 +53,4 @@ endif()
 #target_link_libraries(testr3d raylib_static r3d)
 
 add_executable(serialTest testSerial.cpp)
+add_executable(generate_templates generate_template.c)
