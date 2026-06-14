@@ -63,6 +63,8 @@ declare function IsMouseButtonPressed(button: number): number;
 // Check how much the mousewheel was moved
 declare function GetMouseWheelMove(): number;
 
+// Draw a Line
+declare function DrawLine(startX: number, starty: number, endX: number, endY: number, color: {r: number, g: number, b: number, a: number});
 // Draw a Circle
 declare function DrawCircle(x: number, y: number, radius: number, color: {r: number, g: number, b: number, a: number}): void;
 // Draw a Rectangle
@@ -124,3 +126,8 @@ declare function OpenSerial(path: string, baurate: number): void;
 // Write a message to the opened serial port
 declare function WriteSerial(message: string): void;
 declare function WriteSerial(message: number): void;
+// Check if serial is already opened
+declare function IsSerialOpen(): boolean;
+// Try to reopen serial if originally failed to do so
+declare function SerialRetry(): void;
+declare function ReadSerial(): string;

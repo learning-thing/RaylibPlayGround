@@ -52,8 +52,9 @@ int main(const int argc, char **argv) {
 
     const R3D_Light light = R3D_CreateLight(R3D_LIGHT_DIR);
 
-    R3D_SetLightDirection(light, (Vector3) {1, -1, 1});
+    R3D_SetLightDirection(light, (Vector3) {1, -.5, 1});
     R3D_SetLightActive(light, true);
+    R3D_SetLightEnergy(light, 1);
 
     //R3D_ENVIRONMENT_SET(background.sky, cubemap);
     R3D_GetEnvironment()->background.sky = cubemap;
@@ -65,6 +66,8 @@ int main(const int argc, char **argv) {
     // ------------------------------------------------------- SKY
 
     defaultMaterial = R3D_GetDefaultMaterial();
+    defaultMaterial.albedo.color = {200, 200, 200, 255};
+    defaultMaterial.unlit = false;
     const auto cube = R3D_GenMeshCube(.25, .25, .25);
     g_vR3DMeshes.push_back(cube);
 

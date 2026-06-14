@@ -3,6 +3,7 @@
 //
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define start \
 "#ifndef RAYLIBPLAYGROUND_TEMPLATES_HPP\n" \
@@ -73,7 +74,24 @@ int main(int argc, char *argv[]) {
         }
     }
 
-
+    const char *script_start = "\n\n\nconst char *script_template_src = \n\"";
+    fwrite(script_start, sizeof(char), strlen(script_start), outputHeader);
+    for (int i = 0; i < script_size; ++i) {
+        //End of string
+        if (i == script_size-1) {
+            fwrite(strEnd, sizeof(char), 2, outputHeader);
+            break;
+        }
+        if (script[i] == '\"') {
+            fwrite("\\\"", sizeof(char), 2, outputHeader);
+            continue;
+        }
+        if (script[i] == '\n') {
+            fwrite(newline, sizeof(char), 5, outputHeader);
+        } else {
+            fwrite(&script[i], sizeof(char), 1, outputHeader);
+        }
+    }
 
     //Write the end
     fwrite(end, sizeof(char), sizeof(end)-1, outputHeader);

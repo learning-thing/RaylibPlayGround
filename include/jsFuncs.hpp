@@ -182,7 +182,11 @@ jsFunc(jsIsMouseButtonDown) { js_pushboolean(J, IsMouseButtonDown(js_tonumber(J,
 jsFunc(jsIsMouseButtonPressed) { js_pushboolean(J, IsMouseButtonPressed(js_tonumber(J, 1))); }
 jsFunc(jsGetMouseWheelMove) { js_pushnumber(J, GetMouseWheelMove()); }
 
-    // DrawText("text", x, y, fontsize, COLOR);
+jsFunc(jsDrawLine) {
+    DrawLine(js_tonumber(J, 1), js_tonumber(J, 2), js_tonumber(J, 3), js_tonumber(J, 4), js_toColor(J, 5));
+}
+
+// DrawText("text", x, y, fontsize, COLOR);
 jsFunc(jsDrawText) {
     DrawTextEx(defaultFont, js_tostring(J, 1), {static_cast<float>(js_tonumber(J, 2)), static_cast<float>(js_tonumber(J, 3))}, static_cast<float>(js_tonumber(J, 4)), 1, js_toColor(J, 5));
     js_pop(J, 5);
@@ -513,7 +517,7 @@ jsFunc(jsResizeWindow) {
     SetWindowSize(js_tonumber(J, 1), js_tonumber(J, 2));
 }
 
-inline Serial* serial;
+inline Serial* serial = nullptr;
 
 //Serial stuff
 jsFunc(jsOpenSerial) {
@@ -522,12 +526,35 @@ jsFunc(jsOpenSerial) {
     serial = new Serial(a, baudrate);
 }
 
+jsFunc(jsReadSerial) {
+    if (serial) {
+        const std::string line = serial->readLineAsync();
+        if (!line.empty()) {
+            js_pushstring(J, line.c_str());
+        } else {
+            js_pushstring(J, "");
+        }
+    } else {
+        js_pushundefined(J);
+    }
+}
+
 jsFunc(jsWriteSerial) {
     if (!serial) return;
     if (js_typeof(J, 1)[0] == 'n')
         serial->write(js_tointeger(J, 1));
     else
         serial->write(js_tostring(J, 1));
+}
+
+jsFunc(jsIsSerialOpen) {
+    if (!serial) {js_pushboolean(J, false); return; }
+    js_pushboolean(J, serial->isOpen());
+}
+
+jsFunc(jsSerialRetry) {
+    if (!serial) {std::cerr << "Serial was never opened!\n"; return; }
+    serial->retry();
 }
 
 inline void setupRaylibFuncs(js_State *runtime) {
@@ -573,6 +600,7 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsDrawRectangleLines);
     js_addFunc(jsDrawText);
     js_addFunc(jsDrawImage);
+    js_addFunc(jsDrawLine);
 
     // - 3D
     js_addFunc(jsDrawGrid);
@@ -593,7 +621,7 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsBeginShader);
     js_addFunc(jsEndShader);
 
-    //file reading
+    // file reading
     js_addFunc(jsGetFileModTime);
     js_addFunc(jsSetFont);
     js_addFunc(jsOpenFile);
@@ -601,11 +629,14 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsAtEOF);
     js_addFunc(jsRewind);
 
-    //Serial (wtf am I doing)
+    // Serial (wtf am I doing)
     js_addFunc(jsOpenSerial);
     js_addFunc(jsWriteSerial);
+    js_addFunc(jsIsSerialOpen);
+    js_addFunc(jsSerialRetry);
+    js_addFunc(jsReadSerial);
 
-    //networking & multiplayer
+    // networking & multiplayer
 #ifdef multiplayer
     js_addFunc(jsHost, "Host");
     js_addFunc(jsIsHosting, "IsHosting");

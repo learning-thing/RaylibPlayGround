@@ -17,6 +17,12 @@ var yaw;
 
 var mclaren;
 
+/*
+* GR GT Model from: https://sketchfab.com/3d-models/toyota-gr-gt-9e25a389d96c41f6be2ee63c430d4c30
+*
+* */
+
+
 function onStart() {
     Print("Starting");
     iTime = 0;
@@ -48,7 +54,8 @@ function onReady() {
     AllowWindowResize();
 }
 
-Print("Hot reload ");
+Print("Hot reload.");
+Print("Serial is "+(IsSerialOpen() ? "open" : "closed")+".")
 //SetTargetFPS(100);
 
 function onFrame() {
@@ -68,7 +75,6 @@ function onFrame() {
     if (IsKeyPressed("left")) {
         rotation-=delta*18;
 	}
-
     BeginDrawing();
     //ClearBackground({r: 50, g: 50, b: 50, a: 255});
         distance -= GetMouseWheelMove()*3;
@@ -88,6 +94,7 @@ function onFrame() {
         var zDist = 3;//3
         var offset = -20;
         var amplitude = 2;
+        /*
         for (var y = 0; y < 20; y++) {
             for (var i = 0; i < 10; i++) {
                 blockPos.y = Sin(iTime+y*.5+i*.5) * amplitude;
@@ -100,7 +107,7 @@ function onFrame() {
                 blockPos.x = offset+xDist*i;
                 DrawCube(blockPos, 3, 3, 3, (y % 2) ? BLACK : WHITE);
             }
-        }
+        }*/
         DrawModel(mclaren, {x: 7, y: 5, z: 0}, 30);
         //EndShader();
         EndMode3D();
