@@ -46,6 +46,11 @@ int main(const int argc, char **argv) {
     skyParams.groundEnergy = 2.0f;
     skyParams.skyEnergy = 0.5f;
     skyParams.sunEnergy = 0.5f;
+
+    /*
+     * Skybox from: https://polyhaven.com/a/citrus_orchard_puresky
+     */
+
     const R3D_Cubemap cubemap = R3D_LoadCubemap("models/citrus_orchard_puresky_2k.hdr", R3D_CUBEMAP_LAYOUT_AUTO_DETECT);
     //const R3D_Cubemap skyProcedural = R3D_GenProceduralSky(512, skyParams);
     R3D_GetEnvironment()->tonemap.white = 4.0f;
