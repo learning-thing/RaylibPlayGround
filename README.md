@@ -34,3 +34,4 @@ so I will delay multiplayer until I can actually maintain it.
 - MuJS
 - SteamGameNetworkingSockets
 - (X11)
+- boost::asio
