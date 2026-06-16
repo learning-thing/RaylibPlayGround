@@ -114,6 +114,8 @@ declare function GetLine(fileID: number, maxCharacters: number): number;
 declare function AtEOF(fileID: number): boolean;
 // Rewind a file (reset seek) (actually reopen)
 declare function Rewind(fileID: number): void;
+// Write string to a file
+declare function Save(filePath: string, content: string);
 
 // Host a server
 declare function Host(port: number): void;

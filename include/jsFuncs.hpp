@@ -130,6 +130,10 @@ static std::unordered_map<std::string, KeyboardKey> keyMap = {
 };
 static Font defaultFont;
 
+jsFunc(jsSave) {
+    std::ofstream file(js_tostring(J, 1));
+    file << js_tostring(J, 2);
+}
 
 //js functions
 jsFunc(jsArgCount) {
@@ -631,13 +635,14 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsBeginShader);
     js_addFunc(jsEndShader);
 
-    // file reading
+    // file handling
     js_addFunc(jsGetFileModTime);
     js_addFunc(jsSetFont);
     js_addFunc(jsOpenFile);
     js_addFunc(jsGetLine);
     js_addFunc(jsAtEOF);
     js_addFunc(jsRewind);
+    js_addFunc(jsSave);
 
     // Serial (wtf am I doing)
     js_addFunc(jsOpenSerial);
