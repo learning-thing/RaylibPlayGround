@@ -31,7 +31,7 @@ vendor/r3d/include/)
 
 #add_subdirectory(vendor/raylib_git)
 add_subdirectory(vendor/r3d)
-add_subdirectory(vendor/boost)
+
 if (MULTIPLAYER)
     add_subdirectory(vendor/GameNetworkingSockets)
 endif()
@@ -50,9 +50,9 @@ if(MINGW)
             ${CMAKE_CURRENT_SOURCE_DIR}/vendor/mujs/build/release/libmujs.a
             raylib_static
             #GameNetworkingSockets::static
-            boost
+
     )
-    include_directories(${Boost_INCLUDE_DIRS})
+
 else()
     if (MULTIPLAYER)
     target_link_libraries(RaylibPlayGround
