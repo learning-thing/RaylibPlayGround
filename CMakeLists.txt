@@ -10,14 +10,13 @@ else()
     message(STATUS "Not building with mingw-w64")
 endif()
 
+set(ASSIMP_BUILD_ZLIB ON CACHE BOOL "" FORCE)
+add_compile_definitions(ASSIMP_BUILD_ZLIB=ON)
 set(R3D_RAYLIB_VENDORED ON CACHE BOOL "" FORCE)
+set(R3D_ASSIMP_VENDORED ON CACHE BOOL "" FORCE)
 
 if(MINGW)
-    message(STATUS "Building with mingw-w64")
-    set(R3D_ASSIMP_VENDORED ON CACHE BOOL "" FORCE)
     add_compile_definitions(noserial)
-else()
-    message(STATUS "Not building with mingw-w64")
 endif()
 
 #add_compile_definitions(GRAPHICS_API_OPENGL_21)
