@@ -81,7 +81,7 @@ inline const char *dts =
 "// Draw a Rectangle (Lines only)\n"
 "declare function DrawRectangleLines(): void;\n"
 "// Draw a text\n"
-"declare function DrawText(text: string, xPos: number, yPos: number): void;\n"
+"declare function DrawText(text: string, xPos: number, yPos: number, fontSize: number, tint: {r: number, g: number, b: number, a: number}): void;\n"
 "// Draw an image\n"
 "declare function DrawImage(filePath: string, posX: number, posY: number, width: number, height: number): void;\n"
 "// Draw a 3D grid\n"
@@ -114,6 +114,7 @@ inline const char *dts =
 "declare function SetFont(path: string): void;\n"
 "// Open a file to read (returns file id)\n"
 "declare function OpenFile(path: string): number;\n"
+"declare function CloseFile(fileID: number): void;\n"
 "// Read a file from a file\n"
 "declare function GetLine(fileID: number, maxCharacters: number): number;\n"
 "// Check if end of file has been reached\n"
@@ -141,7 +142,11 @@ inline const char *dts =
 "declare function IsSerialOpen(): boolean;\n"
 "// Try to reopen serial if originally failed to do so\n"
 "declare function SerialRetry(): void;\n"
-"declare function ReadSerial(): string";
+"declare function ReadSerial(): string;\n"
+"// Get the width of text\n"
+"declare function MeasureTextW(text: string, fontSize): number;\n"
+"// Get the height of text\n"
+"declare function MeasureTextH(text: string, fontSize): number";
 
 
 const char *script_template_src = 

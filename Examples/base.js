@@ -13,7 +13,8 @@ function onStart() {
     Print("Starting");
     SetTargetFPS(60);
 
-    player = { x: 0, y: 0 }
+    player = { x: 0, y: 0 };
+    0xFFFFFF;
 }
 
 function onReady() {}

@@ -120,6 +120,7 @@ static std::unordered_map<std::string, KeyboardKey> keyMap = {
     {"shift", KEY_LEFT_SHIFT     },
     {"shift_r", KEY_RIGHT_SHIFT  },
     {"enter", KEY_ENTER          },
+    {"backspace", KEY_BACKSPACE  },
     {"ctrl", KEY_LEFT_CONTROL    },
     {"ctrl_r", KEY_RIGHT_CONTROL },
 
@@ -184,7 +185,22 @@ jsFunc(jsGetCharPressed) {
     buff[0] = static_cast<char>(GetCharPressed());
     if (buff[0]) {
         js_pushstring(J, buff);
+    } else {
+        js_pushundefined(J);
     }
+}
+
+jsFunc(jsMeasureTextW) {
+    const char *text = js_tostring(J, 1);
+    const auto fontSize = static_cast<float>(js_tonumber(J, 2));
+    const float spacing = 1;
+    const auto m = MeasureTextEx(defaultFont, text, fontSize, spacing).x;
+    //std::clog << text << " has width: " << m << "\n";
+    js_pushnumber(J, m);
+}
+
+jsFunc(jsMeasureTextH) {
+    js_pushnumber(J, MeasureTextEx(defaultFont, js_tostring(J, 1), js_tonumber(J, 2), 1).y);
 }
 
 jsFunc(jsIsKeyDown) {
@@ -234,6 +250,10 @@ jsFunc(jsOpenFile) {
 
     js_pop(J, 1);
     js_pushnumber(J, static_cast<double>(newID));
+}
+
+jsFunc(jsCloseFile) {
+    openFiles[js_tointeger(J, 1)].first.close();
 }
 
 jsFunc(jsGetLine) {
@@ -546,7 +566,7 @@ jsFunc(jsReadSerial) {
         if (!line.empty()) {
             js_pushstring(J, line.c_str());
         } else {
-            js_pushstring(J, "");
+            js_pushundefined(J);
         }
     } else {
         js_pushundefined(J);
@@ -585,6 +605,10 @@ inline void setupRaylibFuncs(js_State *runtime) {
     //Math'n'shit
     js_addFunc(jsSin);
     js_addFunc(jsCos);
+
+    //text and strings
+    js_addFunc(jsMeasureTextW);
+    js_addFunc(jsMeasureTextH);
 
     //window n shit
     js_addFunc(jsHeadLessMode);
@@ -643,6 +667,7 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsAtEOF);
     js_addFunc(jsRewind);
     js_addFunc(jsSave);
+    js_addFunc(jsCloseFile);
 
     // Serial (wtf am I doing)
     js_addFunc(jsOpenSerial);
