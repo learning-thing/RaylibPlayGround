@@ -317,7 +317,7 @@ jsFunc(jsMaximizeWindow) {
 
 static std::vector<jsShader> shaders;
 
-#ifdef multilayer
+#ifdef multiplayer
 inline networkingMode_t g_eNetMode = NETWORK_MODE_SINGLEPLAYER;
 inline Server g_nServer;
 inline Client g_nClient;
@@ -680,10 +680,10 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsArgs);
     // networking & multiplayer
 #ifdef multiplayer
-    js_addFunc(jsHost, "Host");
-    js_addFunc(jsIsHosting, "IsHosting");
-    js_addFunc(jsConnect, "Connect");
-    js_addFunc(jsSendMessage, "SendMessage");
+    js_addFunc(jsHost);
+    js_addFunc(jsIsHosting);
+    js_addFunc(jsConnect);
+    js_addFunc(jsSendMessage);
 #endif
 
 }
