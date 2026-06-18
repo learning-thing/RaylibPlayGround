@@ -5,6 +5,7 @@ set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_CXX_STANDARD 20)
 if(MINGW)
     message(STATUS "Building with mingw-w64")
+    add_compile_definitions(noserial)
 else()
     set(MULTIPLAYER ON)
     message(STATUS "Not building with mingw-w64")
@@ -19,6 +20,7 @@ else()
     message(STATUS "Not building with mingw-w64")
 endif()
 
+
 #add_compile_definitions(GRAPHICS_API_OPENGL_21)
 if (MULTIPLAYER)
     add_compile_definitions(multiplayer)
@@ -31,7 +33,11 @@ vendor/r3d/include/)
 
 #add_subdirectory(vendor/raylib_git)
 add_subdirectory(vendor/r3d)
-add_subdirectory(vendor/boost)
+
+#include(vendor/boost/tools/cmake/config/BoostConfig.cmake)
+#include_directories(${Boost_INCLUDE_DIRS})
+
+
 if (MULTIPLAYER)
     add_subdirectory(vendor/GameNetworkingSockets)
 endif()
@@ -44,6 +50,7 @@ add_executable(RaylibPlayGround main.cpp include/jsFuncs.hpp
         include/serial.hpp)
 
 if(MINGW)
+    find_package(boost)
     target_link_libraries(RaylibPlayGround
             PRIVATE
             "-static-libgcc -static-libstdc++ -static"
@@ -52,7 +59,6 @@ if(MINGW)
             #GameNetworkingSockets::static
             boost
     )
-    include_directories(${Boost_INCLUDE_DIRS})
 else()
     if (MULTIPLAYER)
     target_link_libraries(RaylibPlayGround

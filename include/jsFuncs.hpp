@@ -12,15 +12,18 @@
 #include <unordered_map>
 #include <cstring>
 #include <map>
-
-#include "jsShader.hpp"
-#include "serial.hpp"
-#include "../vendor/r3d/include/r3d/r3d_draw.h"
-#include "../vendor/r3d/include/r3d/r3d_lighting.h"
 #ifdef multiplayer
 #include <multiPlayer.hpp>
 #endif
 #include <bits/this_thread_sleep.h>
+#include "jsShader.hpp"
+#include "../vendor/r3d/include/r3d/r3d_draw.h"
+#include "../vendor/r3d/include/r3d/r3d_lighting.h"
+
+
+#ifndef noserial
+#include "serial.hpp"
+#endif
 
 #define jsFunc(name) static void name(js_State *J)
 #define js_addFunc(from) \
@@ -551,16 +554,21 @@ jsFunc(jsResizeWindow) {
     SetWindowSize(static_cast<int>(js_tonumber(J, 1)), static_cast<int>(js_tonumber(J, 2)));
 }
 
+#ifndef noserial
 inline Serial* serial = nullptr;
+#endif
 
 //Serial stuff
 jsFunc(jsOpenSerial) {
+#ifndef noserial
     const std::string a = js_tostring(J, 1);
     const int baudrate = js_tointeger(J, 2);
     serial = new Serial(a, baudrate);
+#endif
 }
 
 jsFunc(jsReadSerial) {
+#ifndef noserial
     if (serial) {
         const std::string line = serial->readLineAsync();
         if (!line.empty()) {
@@ -571,24 +579,35 @@ jsFunc(jsReadSerial) {
     } else {
         js_pushundefined(J);
     }
+#else
+    js_pushundefined(J);
+#endif
 }
 
 jsFunc(jsWriteSerial) {
+#ifndef noserial
     if (!serial) return;
     if (js_typeof(J, 1)[0] == 'n')
         serial->write(js_tointeger(J, 1));
     else
         serial->write(js_tostring(J, 1));
+#endif
 }
 
 jsFunc(jsIsSerialOpen) {
+#ifndef noserial
     if (!serial) {js_pushboolean(J, false); return; }
     js_pushboolean(J, serial->isOpen());
+#else
+    js_pushundefined(J);
+#endif
 }
 
 jsFunc(jsSerialRetry) {
+#ifndef noserial
     if (!serial) {std::cerr << "Serial was never opened!\n"; return; }
     serial->retry();
+#endif
 }
 
 inline void setupRaylibFuncs(js_State *runtime) {
@@ -669,12 +688,14 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsSave);
     js_addFunc(jsCloseFile);
 
+#ifndef noserial
     // Serial (wtf am I doing)
     js_addFunc(jsOpenSerial);
     js_addFunc(jsWriteSerial);
     js_addFunc(jsIsSerialOpen);
     js_addFunc(jsSerialRetry);
     js_addFunc(jsReadSerial);
+#endif
 
     js_addFunc(jsArgCount);
     js_addFunc(jsArgs);
