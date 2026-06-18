@@ -1,6 +1,9 @@
+// get individual args
+declare function Args(pos: number): string;
+// get the amount of args
+declare function ArgcCount(): number;
 // print a message
 declare function Print(message: string): void;
-
 // Beginning of the drawLoop
 declare function BeginDrawing(): void;
 // End of the DrawLoop
@@ -13,8 +16,8 @@ declare function EndMode3D(): void;
 declare function ClearBackground(color: object): void;
 // Draw the current frames per second
 declare function DrawFPS(x: number, y: number): void;
-//Set the disired framerate
-declare function SetTargetFPS(fps: number);
+//Set the desired framerate
+declare function SetTargetFPS(fps: number):void;
 // Pause the application for a given time
 declare function Sleep(duration: number): void;
 // Get the sine
@@ -64,7 +67,7 @@ declare function IsMouseButtonPressed(button: number): number;
 declare function GetMouseWheelMove(): number;
 
 // Draw a Line
-declare function DrawLine(startX: number, starty: number, endX: number, endY: number, color: {r: number, g: number, b: number, a: number});
+declare function DrawLine(startX: number, starty: number, endX: number, endY: number, color: {r: number, g: number, b: number, a: number}): void;
 // Draw a Circle
 declare function DrawCircle(x: number, y: number, radius: number, color: {r: number, g: number, b: number, a: number}): void;
 // Draw a Rectangle
@@ -72,7 +75,7 @@ declare function DrawRectangle(x: number, y: number, width: number, height: numb
 // Draw a Rectangle (Lines only)
 declare function DrawRectangleLines(): void;
 // Draw a text
-declare function DrawText(text: string, xPos: number, yPos: number): void;
+declare function DrawText(text: string, xPos: number, yPos: number, fontSize: number, tint: {r: number, g: number, b: number, a: number}): void;
 // Draw an image
 declare function DrawImage(filePath: string, posX: number, posY: number, width: number, height: number): void;
 // Draw a 3D grid
@@ -105,12 +108,15 @@ declare function GetFileModTime(path: string): number;
 declare function SetFont(path: string): void;
 // Open a file to read (returns file id)
 declare function OpenFile(path: string): number;
+declare function CloseFile(fileID: number): void;
 // Read a file from a file
 declare function GetLine(fileID: number, maxCharacters: number): number;
 // Check if end of file has been reached
 declare function AtEOF(fileID: number): boolean;
 // Rewind a file (reset seek) (actually reopen)
 declare function Rewind(fileID: number): void;
+// Write string to a file
+declare function Save(filePath: string, content: string);
 
 // Host a server
 declare function Host(port: number): void;
@@ -122,7 +128,7 @@ declare function Host(address: string): void;
 declare function SendMessage(message: string): void;
 
 // Open a serial port
-declare function OpenSerial(path: string, baurate: number): void;
+declare function OpenSerial(path: string, baudrate: number): void;
 // Write a message to the opened serial port
 declare function WriteSerial(message: string): void;
 declare function WriteSerial(message: number): void;
@@ -131,3 +137,7 @@ declare function IsSerialOpen(): boolean;
 // Try to reopen serial if originally failed to do so
 declare function SerialRetry(): void;
 declare function ReadSerial(): string;
+// Get the width of text
+declare function MeasureTextW(text: string, fontSize): number;
+// Get the height of text
+declare function MeasureTextH(text: string, fontSize): number;

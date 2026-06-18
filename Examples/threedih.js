@@ -49,7 +49,8 @@ function onReady() {
         fovy: 70,
     }
     blockPos = {x: 6, y: 3, z: 8}
-    SetWindowTitle("Shader fun");
+    //SetWindowTitle("Shader fun");
+    SetWindowTitle("Fun");
     mclaren = LoadModel("models/toyota_gr_gt.glb");
     AllowWindowResize();
 }
@@ -94,7 +95,7 @@ function onFrame() {
         var zDist = 3;//3
         var offset = -20;
         var amplitude = 2;
-        /*
+
         for (var y = 0; y < 20; y++) {
             for (var i = 0; i < 10; i++) {
                 blockPos.y = Sin(iTime+y*.5+i*.5) * amplitude;
@@ -107,8 +108,8 @@ function onFrame() {
                 blockPos.x = offset+xDist*i;
                 DrawCube(blockPos, 3, 3, 3, (y % 2) ? BLACK : WHITE);
             }
-        }*/
-        DrawModel(mclaren, {x: 7, y: 5, z: 0}, 30);
+        }
+        DrawModel(mclaren, {x: 7, y: 3, z: 0}, 8);
         //EndShader();
         EndMode3D();
         DrawFPS(10, 10);

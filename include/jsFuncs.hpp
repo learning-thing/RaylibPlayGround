@@ -34,7 +34,8 @@ js_setglobal(runtime, to)
 */
 
 inline bool g_headLessMode = false;
-
+inline char **args;
+inline unsigned int argCount;
 inline std::vector<std::pair<std::ifstream, std::string>> openFiles;
 inline std::unordered_map<std::string, size_t> fileNameMap;
 
@@ -110,13 +111,18 @@ static std::unordered_map<std::string, KeyboardKey> keyMap = {
     {"s", KEY_S },
     {"d", KEY_D },
 
-    {"up", KEY_UP},
-    {"down", KEY_DOWN   },
-    {"left", KEY_LEFT   },
-    {"right", KEY_RIGHT },
+    {"up",   KEY_UP    },
+    {"down", KEY_DOWN  },
+    {"left", KEY_LEFT  },
+    {"right",KEY_RIGHT },
 
-    {"space", KEY_SPACE},
-    {"enter", KEY_ENTER},
+    {"space", KEY_SPACE          },
+    {"shift", KEY_LEFT_SHIFT     },
+    {"shift_r", KEY_RIGHT_SHIFT  },
+    {"enter", KEY_ENTER          },
+    {"backspace", KEY_BACKSPACE  },
+    {"ctrl", KEY_LEFT_CONTROL    },
+    {"ctrl_r", KEY_RIGHT_CONTROL },
 
     {"e", KEY_E },
     {"q", KEY_Q },
@@ -125,7 +131,21 @@ static std::unordered_map<std::string, KeyboardKey> keyMap = {
 };
 static Font defaultFont;
 
+jsFunc(jsSave) {
+    std::ofstream file(js_tostring(J, 1));
+    file << js_tostring(J, 2);
+}
+
 //js functions
+jsFunc(jsArgCount) {
+    js_pushnumber(J, argCount);
+}
+jsFunc(jsArgs) {
+    if (const auto pos = js_tointeger(J, 1); pos < argCount-1 && pos > 0)
+        js_pushstring(J, args[pos]);
+    else
+        js_pushstring(J, args[argCount-1]);
+}
 jsFunc(jsHeadLessMode) { g_headLessMode = true; }
 jsFunc(jsPrint) { std::cout << js_tostring(J, 1) << std::endl; js_pop(J, 1); }
 jsFunc(jsBeginDrawing) { BeginDrawing(); }
@@ -165,7 +185,22 @@ jsFunc(jsGetCharPressed) {
     buff[0] = static_cast<char>(GetCharPressed());
     if (buff[0]) {
         js_pushstring(J, buff);
+    } else {
+        js_pushundefined(J);
     }
+}
+
+jsFunc(jsMeasureTextW) {
+    const char *text = js_tostring(J, 1);
+    const auto fontSize = static_cast<float>(js_tonumber(J, 2));
+    const float spacing = 1;
+    const auto m = MeasureTextEx(defaultFont, text, fontSize, spacing).x;
+    //std::clog << text << " has width: " << m << "\n";
+    js_pushnumber(J, m);
+}
+
+jsFunc(jsMeasureTextH) {
+    js_pushnumber(J, MeasureTextEx(defaultFont, js_tostring(J, 1), js_tonumber(J, 2), 1).y);
 }
 
 jsFunc(jsIsKeyDown) {
@@ -178,12 +213,12 @@ jsFunc(jsGetMouseX) { js_pushnumber(J, GetMouseX()); }
 jsFunc(jsGetMouseY) { js_pushnumber(J, GetMouseY()); }
 jsFunc(jsGetMouseDeltaX) { js_pushnumber(J, GetMouseDelta().x); }
 jsFunc(jsGetMouseDeltaY) { js_pushnumber(J, GetMouseDelta().y); }
-jsFunc(jsIsMouseButtonDown) { js_pushboolean(J, IsMouseButtonDown(js_tonumber(J, 1))); }
-jsFunc(jsIsMouseButtonPressed) { js_pushboolean(J, IsMouseButtonPressed(js_tonumber(J, 1))); }
+jsFunc(jsIsMouseButtonDown) { js_pushboolean(J, IsMouseButtonDown(static_cast<int>(js_tonumber(J, 1)))); }
+jsFunc(jsIsMouseButtonPressed) { js_pushboolean(J, IsMouseButtonPressed(static_cast<int>(js_tonumber(J, 1)))); }
 jsFunc(jsGetMouseWheelMove) { js_pushnumber(J, GetMouseWheelMove()); }
 
 jsFunc(jsDrawLine) {
-    DrawLine(js_tonumber(J, 1), js_tonumber(J, 2), js_tonumber(J, 3), js_tonumber(J, 4), js_toColor(J, 5));
+    DrawLine(static_cast<int>(js_tonumber(J, 1)), static_cast<int>(js_tonumber(J, 2)), static_cast<int>(js_tonumber(J, 3)), static_cast<int>(js_tonumber(J, 4)), js_toColor(J, 5));
 }
 
 // DrawText("text", x, y, fontsize, COLOR);
@@ -215,6 +250,10 @@ jsFunc(jsOpenFile) {
 
     js_pop(J, 1);
     js_pushnumber(J, static_cast<double>(newID));
+}
+
+jsFunc(jsCloseFile) {
+    openFiles[js_tointeger(J, 1)].first.close();
 }
 
 jsFunc(jsGetLine) {
@@ -333,7 +372,7 @@ jsFunc(jsDrawGrid) {
 }
 
 jsFunc(jsLoadShader) {
-    const size_t s = static_cast<double>(shaders.size());
+    const auto s = static_cast<size_t>(shaders.size());
     shaders.emplace_back(js_tostring(J, 1), js_tostring(J, 2));
     js_pushnumber(J, s);
 }
@@ -384,7 +423,7 @@ jsFunc(jsDrawImage) {
     if (images.contains(imgPath)) {
         //images[imgPath], {0, 0, width, height}, {x, y}, WHITE
         if (width == 0.0f) {
-            DrawTexturePro(images[imgPath], {0, 0, static_cast<float>(images[imgPath].width), static_cast<float>(images[imgPath].width)}, {x, y, (float)images[imgPath].width, (float)images[imgPath].height}, {0, 0}, 0, WHITE);
+            DrawTexturePro(images[imgPath], {0, 0, static_cast<float>(images[imgPath].width), static_cast<float>(images[imgPath].width)}, {x, y, static_cast<float>(images[imgPath].width), static_cast<float>(images[imgPath].height)}, {0, 0}, 0, WHITE);
         } else {
             DrawTexturePro(images[imgPath], {0, 0, static_cast<float>(images[imgPath].width), static_cast<float>(images[imgPath].width)}, {x, y, width, height}, {0, 0}, 0, WHITE);
         }
@@ -399,23 +438,18 @@ jsFunc(jsDrawImage) {
 jsFunc(jsDrawCube) {
     // Get the color from an object
     constexpr unsigned int argPos = 1;
-    const unsigned int argCount = 5;
 
     assert(js_hasproperty(J, argPos, "x"));
     js_getproperty(J, argPos, "x");
-    const float x = js_tonumber(J, js_gettop(J)-1);
+    const auto x = static_cast<float>(js_tonumber(J, js_gettop(J)-1));
 
     assert(js_hasproperty(J, argPos, "y"));
     js_getproperty(J, argPos, "y");
-    const float y = js_tonumber(J, js_gettop(J)-1);
+    const auto y = static_cast<float>(js_tonumber(J, js_gettop(J)-1));
 
     assert(js_hasproperty(J, argPos, "z"));
     js_getproperty(J, argPos, "z");
-    const float z = js_tonumber(J, js_gettop(J)-1);
-
-    const float width  = js_tonumber(J, 2);
-    const float height = js_tonumber(J, 3);
-    const float length = js_tonumber(J, 4);
+    const auto z = static_cast<float>(js_tonumber(J, js_gettop(J)-1));
 
     Color col;
     //assert(js_hasproperty(J, 5, "r"));
@@ -443,32 +477,32 @@ jsFunc(jsDrawCube) {
 jsFunc(jsGenMeshCube) {
     const auto s = g_vR3DMeshes.size();
     g_vR3DMeshes.emplace_back(js_tonumber(J, 1), js_tonumber(J, 2), js_tonumber(J, 3));
-    js_pushnumber(J, s);
+    js_pushnumber(J, static_cast<double>(s));
 }
 
 jsFunc(jsDrawMesh) {
-    const auto mesh = js_tonumber(J, 1);
+    const auto mesh = static_cast<size_t>(js_tonumber(J, 1));
     R3D_DrawMesh(g_vR3DMeshes[mesh], defaultMaterial, {0, 0, 0}, 10);
 }
 
 jsFunc(jsDrawCubeWires) {
     // Get the color from an object
     constexpr unsigned int argPos = 1;
-    constexpr unsigned int argCount = 5;
+    const auto j_argCount = js_gettop(J);
 
     assert(js_hasproperty(J, argPos, "x"));
     js_getproperty(J, argPos, "x");
-    const float x      = static_cast<float>(js_tonumber(J, argCount + 2));
+    const auto x      = static_cast<float>(js_tonumber(J, j_argCount + 2));
 
     js_getproperty(J, argPos, "y");
-    const float y      = static_cast<float>(js_tonumber(J, argCount + 3));
+    const auto y      = static_cast<float>(js_tonumber(J, j_argCount + 3));
 
     js_getproperty(J, argPos, "z");
-    const float z      = static_cast<float>(js_tonumber(J, argCount + 4));
+    const auto z      = static_cast<float>(js_tonumber(J, j_argCount + 4));
 
-    const float width  = static_cast<float>(js_tonumber(J, 2));
-    const float height = static_cast<float>(js_tonumber(J, 3));
-    const float length = static_cast<float>(js_tonumber(J, 4));
+    const auto width  = static_cast<float>(js_tonumber(J, 2));
+    const auto height = static_cast<float>(js_tonumber(J, 3));
+    const auto length = static_cast<float>(js_tonumber(J, 4));
 
     Color col;
     assert(js_hasproperty(J, 5, "r"));
@@ -501,12 +535,12 @@ jsFunc(jsDrawCubeV) {
 jsFunc(jsLoadModel) {
     const auto id = g_vModels.size();
     g_vModels.push_back(R3D_LoadModel(js_tostring(J, 1)));
-    js_pushnumber(J, id);
+    js_pushnumber(J, static_cast<double>(id));
 }
 
 jsFunc(jsDrawModel) {
-    const auto modelID = js_tonumber(J, 1);
-    R3D_DrawModel(g_vModels[modelID], js_toVec3(J, 2), js_tonumber(J, 3));
+    const auto modelID = static_cast<size_t>(js_tointeger(J, 1));
+    R3D_DrawModel(g_vModels[modelID], js_toVec3(J, 2), static_cast<float>(js_tonumber(J, 3)));
 }
 
 jsFunc(jsCloseWindow) {
@@ -514,7 +548,7 @@ jsFunc(jsCloseWindow) {
 }
 
 jsFunc(jsResizeWindow) {
-    SetWindowSize(js_tonumber(J, 1), js_tonumber(J, 2));
+    SetWindowSize(static_cast<int>(js_tonumber(J, 1)), static_cast<int>(js_tonumber(J, 2)));
 }
 
 inline Serial* serial = nullptr;
@@ -532,7 +566,7 @@ jsFunc(jsReadSerial) {
         if (!line.empty()) {
             js_pushstring(J, line.c_str());
         } else {
-            js_pushstring(J, "");
+            js_pushundefined(J);
         }
     } else {
         js_pushundefined(J);
@@ -572,6 +606,10 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsSin);
     js_addFunc(jsCos);
 
+    //text and strings
+    js_addFunc(jsMeasureTextW);
+    js_addFunc(jsMeasureTextH);
+
     //window n shit
     js_addFunc(jsHeadLessMode);
     js_addFunc(jsGetFrameTime);
@@ -610,7 +648,7 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsLoadModel);
     js_addFunc(jsGenMeshCube);
 
-    //r3d
+    // r3d
     js_addFunc(jsDrawMesh);
     js_addFunc(jsDrawModel);
 
@@ -621,13 +659,15 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsBeginShader);
     js_addFunc(jsEndShader);
 
-    // file reading
+    // file handling
     js_addFunc(jsGetFileModTime);
     js_addFunc(jsSetFont);
     js_addFunc(jsOpenFile);
     js_addFunc(jsGetLine);
     js_addFunc(jsAtEOF);
     js_addFunc(jsRewind);
+    js_addFunc(jsSave);
+    js_addFunc(jsCloseFile);
 
     // Serial (wtf am I doing)
     js_addFunc(jsOpenSerial);
@@ -636,6 +676,8 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsSerialRetry);
     js_addFunc(jsReadSerial);
 
+    js_addFunc(jsArgCount);
+    js_addFunc(jsArgs);
     // networking & multiplayer
 #ifdef multiplayer
     js_addFunc(jsHost, "Host");

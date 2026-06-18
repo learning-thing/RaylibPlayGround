@@ -28,6 +28,10 @@ int main(const int argc, char **argv) {
         return -1;
     }
 
+    //Setup args
+    argCount = argc;
+    args = argv;
+
     // Function on init
     // App start, Raylib not initilaized
     js_dostring(runtime, "onStart();");
