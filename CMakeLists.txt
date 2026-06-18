@@ -50,7 +50,6 @@ add_executable(RaylibPlayGround main.cpp include/jsFuncs.hpp
         include/serial.hpp)
 
 if(MINGW)
-    find_package(boost)
     target_link_libraries(RaylibPlayGround
             PRIVATE
             "-static-libgcc -static-libstdc++ -static"
