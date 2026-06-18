@@ -7,3 +7,6 @@
 [submodule "vendor/r3d"]
 	path = vendor/r3d
 	url = https://github.com/Bigfoot71/r3d
+[submodule "vendor/boost"]
+	path = vendor/boost
+	url = https://github.com/boostorg/boost
