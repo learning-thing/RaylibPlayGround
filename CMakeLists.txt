@@ -51,7 +51,7 @@ if(MINGW)
             ${CMAKE_CURRENT_SOURCE_DIR}/vendor/mujs/build/release/libmujs.a
             raylib_static
             #GameNetworkingSockets::static
-
+            r3d
     )
 
 else()
@@ -74,5 +74,5 @@ else()
     endif()
 endif()
 
-add_executable(serialTest testSerial.cpp)
+#add_executable(serialTest testSerial.cpp)
 add_executable(generate_templates generate_template.c)
