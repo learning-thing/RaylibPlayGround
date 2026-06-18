@@ -52,7 +52,7 @@ if(MINGW)
             #GameNetworkingSockets::static
             boost
     )
-    include_directories(vendor/boost/libs/asio/include)
+    include_directories(${Boost_INCLUDE_DIRS})
 else()
     if (MULTIPLAYER)
     target_link_libraries(RaylibPlayGround
