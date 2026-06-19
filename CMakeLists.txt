@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 if(MINGW)
     message(STATUS "Building with mingw-w64")
 else()
-    set(MULTIPLAYER ON)
+    #set(MULTIPLAYER ON)
     message(STATUS "Not building with mingw-w64")
 endif()
 

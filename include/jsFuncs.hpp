@@ -41,6 +41,7 @@ inline char **args;
 inline unsigned int argCount;
 inline std::vector<std::pair<std::ifstream, std::string>> openFiles;
 inline std::unordered_map<std::string, size_t> fileNameMap;
+inline bool serialwarned = false;
 
 // graphics stuff
 inline R3D_Material defaultMaterial;
@@ -563,7 +564,12 @@ jsFunc(jsOpenSerial) {
 #ifndef noserial
     const std::string a = js_tostring(J, 1);
     const int baudrate = js_tointeger(J, 2);
-    serial = new Serial(a, baudrate);
+    try {
+        serial = new Serial(a, baudrate);
+    } catch (const boost::wrapexcept<boost::system::system_error>& e) {
+        std::cerr << "Failed to open serial: \n\t" << e.what() << std::endl;
+        delete serial;
+    }
 #endif
 }
 
@@ -578,6 +584,9 @@ jsFunc(jsReadSerial) {
         }
     } else {
         js_pushundefined(J);
+        if (serialwarned) return;
+        std::cerr << "Attempted to use serial when none was opened" << std::endl;
+        serialwarned = true;
     }
 #else
     js_pushundefined(J);
@@ -586,7 +595,12 @@ jsFunc(jsReadSerial) {
 
 jsFunc(jsWriteSerial) {
 #ifndef noserial
-    if (!serial) return;
+    if (!serial) {
+        if (serialwarned) return;
+        std::cerr << "Attempted to use serial when none was opened" << std::endl;
+        serialwarned = true;
+        return;
+    }
     if (js_typeof(J, 1)[0] == 'n')
         serial->write(js_tointeger(J, 1));
     else
@@ -596,7 +610,12 @@ jsFunc(jsWriteSerial) {
 
 jsFunc(jsIsSerialOpen) {
 #ifndef noserial
-    if (!serial) {js_pushboolean(J, false); return; }
+    if (!serial) {
+        js_pushboolean(J, false); return;
+        if (serialwarned) return;
+        std::cerr << "Attempted to use serial when none was opened" << std::endl;
+        serialwarned = true;
+    }
     js_pushboolean(J, serial->isOpen());
 #else
     js_pushundefined(J);
