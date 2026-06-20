@@ -1,4 +1,4 @@
-
+- The generated .d.ts might be more up-to-date if I forget to update the docs
 # Window/Application
 ```js
 // Can be used inside onStart() to launch without a window (useful for servers)
@@ -86,6 +86,9 @@ DrawRectangleLines(x, y, width, height, {r, g, b, a});
 // Draw a string/Text
 DrawText(text: String, x, y, fontSize, {r, g, b, a} );
 
+// Draw an image
+DrawImage(filePath: string, posX: number, posY: number, width: number, height: number): void;
+
 // Set the Font to use by File
 SetFont(path: String);
 
@@ -129,6 +132,8 @@ AtEOF(file: Number);
 // Reset/reopen a file, to start it again from the beginning and force a cache reload
 Rewind(file: Number);
 
+// Write a String to a file
+Save(filename: String, content: String)
 ```
 
 # Networking
@@ -165,4 +170,18 @@ sin(x: Number);
 
 // Get Cosine of X
 cos(x: Number);
+```
+
+# Serial
+The Serial API uses boost but is currently only supported on Linux.
+```js
+// Open a serial port
+OpenSerial(path: string, baudrate: number): void;
+// Write a message to the opened serial port
+WriteSerial(message: string): void;
+// Check if serial is already opened
+IsSerialOpen(): boolean;
+// Try to reopen serial if originally failed to do so
+SerialRetry(): void;
+ReadSerial(): string;
 ```

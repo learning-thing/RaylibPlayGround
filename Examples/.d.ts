@@ -87,9 +87,9 @@ declare function DrawGrid(slices: number, spacing: number): void;
 // Draw a 3D Cube
 declare function DrawCube(position: object, width: number, height: number, length: number): void;
 // Draw a 3D Cube (from vectors)
-declare function DrawCubeV(): void;
+declare function DrawCubeV(pos: {x: number, y: number, z: number}, size: {x: number, y: number, z: number}, color: {r: number, g: number, b: number, a: number}): void;
 // Draw a 3D Cube (from vectors), just wires (broken)
-declare function DrawCubeWires(): void;
+declare function DrawCubeWires(position: object, width: number, height: number, length: number): void;
 // Load a 3D model
 declare function LoadModel(path: string): number;
 // Draw a mesh
@@ -135,7 +135,6 @@ declare function SendMessage(message: string): void;
 declare function OpenSerial(path: string, baudrate: number): void;
 // Write a message to the opened serial port
 declare function WriteSerial(message: string): void;
-declare function WriteSerial(message: number): void;
 // Check if serial is already opened
 declare function IsSerialOpen(): boolean;
 // Try to reopen serial if originally failed to do so

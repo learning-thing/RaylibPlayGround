@@ -14,6 +14,10 @@ inline const char *dts =
 "declare function BeginDrawing(): void;\n"
 "// End of the DrawLoop\n"
 "declare function EndDrawing(): void;\n"
+"// Use a 2D camera\n"
+"declare function BeginMode2D(camera2D: {offset: {x: number, y: number}, target: {x: number, y: number}, rotation: number, zoom: number} ): void;\n"
+"//Stop using currently used 2D camera\n"
+"declare function EndMode2D(): void;\n"
 "// Start 3d rendering mode\n"
 "declare function BeginMode3D(camera: { position: {x: number, y: number, z: number}, target: {x: number, y: number, z: number}, up: {x: number, y: number, z: number}, fovy: number }): void;\n"
 "// End 3d rendering mode\n"
@@ -137,7 +141,6 @@ inline const char *dts =
 "declare function OpenSerial(path: string, baudrate: number): void;\n"
 "// Write a message to the opened serial port\n"
 "declare function WriteSerial(message: string): void;\n"
-"declare function WriteSerial(message: number): void;\n"
 "// Check if serial is already opened\n"
 "declare function IsSerialOpen(): boolean;\n"
 "// Try to reopen serial if originally failed to do so\n"
@@ -146,7 +149,17 @@ inline const char *dts =
 "// Get the width of text\n"
 "declare function MeasureTextW(text: string, fontSize): number;\n"
 "// Get the height of text\n"
-"declare function MeasureTextH(text: string, fontSize): number";
+"declare function MeasureTextH(text: string, fontSize): number;\n"
+"// Create a RenderTexture\n"
+"declare function CreateRenderTexture(width: number, height: number): number;\n"
+"// Start using a RenderTexture\n"
+"declare function BeginTextureMode(textureID: number): void;\n"
+"// Stop using the current RenderTexture\n"
+"declare function EndTextureMode(): void;\n"
+"// Set the texture Filtering mode for a RenderTexture\n"
+"declare function TexFilterPoint(textureID: number): void;\n"
+"// Draw a RenderTexture\n"
+"declare function DrawRenderTexture(textureID: number): void";
 
 
 const char *script_template_src = 
