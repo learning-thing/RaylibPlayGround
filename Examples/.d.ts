@@ -8,6 +8,10 @@ declare function Print(message: string): void;
 declare function BeginDrawing(): void;
 // End of the DrawLoop
 declare function EndDrawing(): void;
+// Use a 2D camera
+declare function BeginMode2D(camera2D: {offset: {x: number, y: number}, target: {x: number, y: number}, rotation: number, zoom: number} ): void;
+//Stop using currently used 2D camera
+declare function EndMode2D(): void;
 // Start 3d rendering mode
 declare function BeginMode3D(camera: { position: {x: number, y: number, z: number}, target: {x: number, y: number, z: number}, up: {x: number, y: number, z: number}, fovy: number }): void;
 // End 3d rendering mode
@@ -141,3 +145,13 @@ declare function ReadSerial(): string;
 declare function MeasureTextW(text: string, fontSize): number;
 // Get the height of text
 declare function MeasureTextH(text: string, fontSize): number;
+// Create a RenderTexture
+declare function CreateRenderTexture(width: number, height: number): number;
+// Start using a RenderTexture
+declare function BeginTextureMode(textureID: number): void;
+// Stop using the current RenderTexture
+declare function EndTextureMode(): void;
+// Set the texture Filtering mode for a RenderTexture
+declare function TexFilterPoint(textureID: number): void;
+// Draw a RenderTexture
+declare function DrawRenderTexture(textureID: number): void;

@@ -44,10 +44,12 @@ inline std::unordered_map<std::string, size_t> fileNameMap;
 inline bool serialwarned = false;
 
 // graphics stuff
+inline std::vector<RenderTexture> renderTextures;
 inline R3D_Material defaultMaterial;
 inline std::vector<R3D_Mesh> g_vR3DMeshes;
 inline std::vector<R3D_Light> g_vR3DLights;
 inline std::vector<R3D_Model> g_vModels;
+
 
 //Helper functions
 static Vector3 js_toVec3(js_State *J, const unsigned short argPos) {
@@ -65,6 +67,20 @@ static Vector3 js_toVec3(js_State *J, const unsigned short argPos) {
     js_pop(J, 1);
 
     return {x, y, z};
+}
+
+//Helper functions
+static Vector2 js_toVec2(js_State *J, const unsigned short argPos) {
+    // Get the color from an object
+    js_getproperty(J, argPos, "x");
+    const auto x = static_cast<float>(js_tonumber(J, js_gettop(J)-1));
+    js_pop(J, 1);
+
+    js_getproperty(J, argPos, "y");
+    const auto y = static_cast<float>(js_tonumber(J, js_gettop(J)-1));
+    js_pop(J, 1);
+
+    return {x, y};
 }
 
 //Helper functions
@@ -107,6 +123,23 @@ static Camera3D js_toCamera(js_State *J, const unsigned short argPos) {
     js_pop(J, 1);
 
     return {position, target, up, fov, CAMERA_PERSPECTIVE};
+}
+
+static Camera2D js_toCamera2D(js_State *J, const unsigned short argPos) {
+    js_getproperty(J, argPos, "offset");
+    const auto Offset = js_toVec2(J, js_gettop(J)-1);
+    js_pop(J, 1);
+
+    js_getproperty(J, argPos, "target");
+    const auto [targX, targY] = js_toVec2(J,js_gettop(J)-1);
+
+    js_getproperty(J, argPos, "rotation");
+    const float rotation = static_cast<float>(js_tonumber(J, js_gettop(J)-1));
+
+    js_getproperty(J, argPos, "zoom");
+    const float zoom = static_cast<float>(js_tonumber(J,js_gettop(J)-1));
+    js_pop(J, 1);
+    return {Offset, targX, targY, rotation, zoom};
 }
 
 static std::unordered_map<std::string, KeyboardKey> keyMap = {
@@ -629,6 +662,42 @@ jsFunc(jsSerialRetry) {
 #endif
 }
 
+jsFunc(jsCreateRenderTexture) {
+    const auto id = renderTextures.size();
+    const auto width=js_tointeger(J, 1), height=js_tointeger(J, 2);
+    renderTextures.push_back(LoadRenderTexture(width, height));
+    js_pushnumber(J, id);
+}
+
+jsFunc(jsBeginTextureMode) {
+    const auto texId = js_tointeger(J, 1);
+    const auto& text = renderTextures[texId];
+    BeginTextureMode(text);
+}
+
+jsFunc(jsEndTextureMode) {
+    EndTextureMode();
+}
+
+jsFunc(jsTexFilterPoint) {
+    const auto& texture = renderTextures[js_tointeger(J, 1)];
+    SetTextureFilter(texture.texture, TEXTURE_FILTER_POINT);
+}
+
+jsFunc(jsBeginMode2D) {
+    const Camera2D cam = js_toCamera2D(J, 1);
+    BeginMode2D(cam);
+}
+
+jsFunc(jsEndMode2D) {
+    EndMode2D();
+}
+
+jsFunc(jsDrawRenderTexture) {
+    const auto& texture = renderTextures[js_tointeger(J, 1)];
+    DrawTexture(texture.texture, 0, 0, WHITE);
+}
+
 inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsPrint);
     js_addFunc(jsBeginDrawing);
@@ -726,6 +795,14 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsSendMessage);
 #endif
 
+    js_addFunc(jsCreateRenderTexture);
+    js_addFunc(jsBeginTextureMode);
+    js_addFunc(jsEndTextureMode);
+    js_addFunc(jsTexFilterPoint);
+    js_addFunc(jsDrawRenderTexture);
+
+    js_addFunc(jsBeginMode2D);
+    js_addFunc(jsEndMode2D);
 }
 
 static volatile const char *inBinaryMsg = "Bro please don't reverse engineer, there's source code on github";
