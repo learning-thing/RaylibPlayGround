@@ -666,6 +666,7 @@ jsFunc(jsCreateRenderTexture) {
     const auto id = renderTextures.size();
     const auto width=js_tointeger(J, 1), height=js_tointeger(J, 2);
     renderTextures.push_back(LoadRenderTexture(width, height));
+
     js_pushnumber(J, id);
 }
 
@@ -694,8 +695,9 @@ jsFunc(jsEndMode2D) {
 }
 
 jsFunc(jsDrawRenderTexture) {
-    const auto& texture = renderTextures[js_tointeger(J, 1)];
-    DrawTexture(texture.texture, 0, 0, WHITE);
+    const auto& texture = renderTextures[js_tointeger(J, 1)].texture;
+    //DrawTexture(texture, 0, 0, WHITE);
+    DrawTextureRec(texture, {0, 0, static_cast<float>(texture.width), static_cast<float>(-texture.height)}, (Vector2){0, 0}, WHITE);
 }
 
 inline void setupRaylibFuncs(js_State *runtime) {
