@@ -84,6 +84,8 @@ declare function DrawRectangleLines(): void;
 declare function DrawText(text: string, xPos: number, yPos: number, fontSize: number, tint: {r: number, g: number, b: number, a: number}): void;
 // Draw an image
 declare function DrawImage(filePath: string, posX: number, posY: number, width: number, height: number): void;
+// Draw A texture like a pro
+declare function DrawTexturePro(filePath: string, posX: number, posY: number, width: number, height: number, sourceWidth: number, sourceHeight: number): void;
 // Draw a 3D grid
 declare function DrawGrid(slices: number, spacing: number): void;
 // Draw a 3D Cube

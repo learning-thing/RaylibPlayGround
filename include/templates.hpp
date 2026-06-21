@@ -90,6 +90,8 @@ inline const char *dts =
 "declare function DrawText(text: string, xPos: number, yPos: number, fontSize: number, tint: {r: number, g: number, b: number, a: number}): void;\n"
 "// Draw an image\n"
 "declare function DrawImage(filePath: string, posX: number, posY: number, width: number, height: number): void;\n"
+"// Draw A texture like a pro\n"
+"declare function DrawTexturePro(filePath: string, posX: number, posY: number, width: number, height: number, sourceWidth: number, sourceHeight: number): void;\n"
 "// Draw a 3D grid\n"
 "declare function DrawGrid(slices: number, spacing: number): void;\n"
 "// Draw a 3D Cube\n"
