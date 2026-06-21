@@ -11,6 +11,10 @@
 #include <templates.hpp>
 #include "vendor/r3d/include/r3d/r3d.h"
 
+#ifdef noserial
+#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+#endif
+
 using namespace std::chrono_literals;
 
 int main(const int argc, char **argv) {
