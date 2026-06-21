@@ -422,7 +422,7 @@ jsFunc(jsEndShader) {
     EndShaderMode();
 }
 
-jsFunc(jsGetShaderLoc) {
+jsFunc(jsGetUniformLocation) {
     const char *name = js_tostring(J, 2);
     const int loc = shaders[js_tointeger(J, 1)].getUniformLoc(name);
     std::cout << "Shader location of " << name << " is " << loc << std::endl;
@@ -836,7 +836,7 @@ inline void setupRaylibFuncs(js_State *runtime) {
 
     // - Shader
     js_addFunc(jsLoadShader);
-    js_addFunc(jsGetShaderLoc);
+    js_addFunc(jsGetUniformLocation);
     js_addFunc(jsSetUniform);
     js_addFunc(jsBeginShader);
     js_addFunc(jsEndShader);
