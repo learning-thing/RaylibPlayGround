@@ -456,13 +456,20 @@ jsFunc(jsDrawImage) {
     const auto width  = static_cast<float>(js_tonumber(J, 4));
     const auto height = static_cast<float>(js_tonumber(J, 5));
 
+
     //If that image has already been loaded
     if (images.contains(imgPath)) {
         //images[imgPath], {0, 0, width, height}, {x, y}, WHITE
+        const auto& img = images[imgPath];
         if (width == 0.0f) {
-            DrawTexturePro(images[imgPath], {0, 0, static_cast<float>(images[imgPath].width), static_cast<float>(images[imgPath].width)}, {x, y, static_cast<float>(images[imgPath].width), static_cast<float>(images[imgPath].height)}, {0, 0}, 0, WHITE);
+            DrawTexturePro(img, {0, 0, static_cast<float>(img.width), static_cast<float>(img.height)}, {x, y, static_cast<float>(img.width), static_cast<float>(img.height)}, {0, 0}, 0, WHITE);
         } else {
-            DrawTexturePro(images[imgPath], {0, 0, static_cast<float>(images[imgPath].width), static_cast<float>(images[imgPath].width)}, {x, y, width, height}, {0, 0}, 0, WHITE);
+            if (height == 0) {
+                const auto useHeight = img.height * width/img.width;
+                DrawTexturePro(img, {0, 0, static_cast<float>(img.width), static_cast<float>(img.height)}, {x, y, width, useHeight }, {0, 0}, 0, WHITE);
+            } else {
+                DrawTexturePro(img, {0, 0, static_cast<float>(img.width), static_cast<float>(img.height)}, {x, y, width, height}, {0, 0}, 0, WHITE);
+            }
         }
     } else {
         //Load the image
@@ -696,8 +703,28 @@ jsFunc(jsEndMode2D) {
 
 jsFunc(jsDrawRenderTexture) {
     const auto& texture = renderTextures[js_tointeger(J, 1)].texture;
+
+    // Adjust for aspect ration
+    Vector2 origin = {0, 0};
+    Rectangle destination = {0, 0, static_cast<float>(GetScreenWidth()), static_cast<float>(GetScreenHeight())};
+    float aspect = static_cast<float>(texture.height)/static_cast<float>(texture.width);
+
+    // Check which axis to max fill
+    if (GetScreenHeight() >= GetScreenWidth() * aspect) {
+        //Fill out X
+        destination.width  = GetScreenWidth();
+        destination.height = GetScreenWidth() * aspect;
+        destination.y = (GetScreenHeight()-destination.height)/2;
+    } else {
+        //fill Y axis
+        destination.height = GetScreenHeight();
+        destination.width  = GetScreenHeight() / aspect;
+        destination.x = (GetScreenWidth()-destination.width)/2;
+    }
+
     //DrawTexture(texture, 0, 0, WHITE);
-    DrawTextureRec(texture, {0, 0, static_cast<float>(texture.width), static_cast<float>(-texture.height)}, (Vector2){0, 0}, WHITE);
+    //DrawTextureRec(texture, {0, 0, static_cast<float>(texture.width), static_cast<float>(-texture.height)}, (Vector2){0, 0}, WHITE);
+    DrawTexturePro(texture, {0, 0, static_cast<float>(texture.width), static_cast<float>(-texture.height)}, destination, origin, 0, WHITE);
 }
 
 inline void setupRaylibFuncs(js_State *runtime) {
@@ -728,6 +755,7 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsSetWindowTitle);
     js_addFunc(jsCloseWindow);
     js_addFunc(jsAllowWindowResize);
+    js_addFunc(jsResizeWindow);
 
     //inputn allat
     js_addFunc(jsGetCharPressed);
