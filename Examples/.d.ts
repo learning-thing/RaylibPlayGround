@@ -44,12 +44,14 @@ declare function MaximizeWindow(): void;
 declare function SetWindowTitle(title: string): void;
 // Allow resizing
 declare function AllowWindowResize(): void;
-
 // Closes the window
 declare function CloseWindow(): void;
+// Get the refreshrate of the given monitor
+declare function GetMonitorRefreshRate(monitor: number): number;
+// Get the current monitor id
+declare function GetCurrentMonitor(): number;
 // Get the char pressed (check [0] of the returned string)
 declare function GetCharPressed(): string;
-
 // Check if a key is held down
 declare function IsKeyDown(key: string): boolean;
 // Check if a key just got pressed

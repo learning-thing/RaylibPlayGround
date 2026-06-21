@@ -727,6 +727,14 @@ jsFunc(jsDrawRenderTexture) {
     DrawTexturePro(texture, {0, 0, static_cast<float>(texture.width), static_cast<float>(-texture.height)}, destination, origin, 0, WHITE);
 }
 
+jsFunc(jsGetCurrentMonitor) {
+    js_pushnumber(J, GetCurrentMonitor());
+}
+
+jsFunc(jsGetMonitorRefreshRate) {
+    js_pushnumber(J, GetMonitorRefreshRate(js_tointeger(J, 1)));
+}
+
 inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsPrint);
     js_addFunc(jsBeginDrawing);
@@ -756,6 +764,10 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsCloseWindow);
     js_addFunc(jsAllowWindowResize);
     js_addFunc(jsResizeWindow);
+
+    //Monitor
+    js_addFunc(jsGetCurrentMonitor);
+    js_addFunc(jsGetMonitorRefreshRate);
 
     //inputn allat
     js_addFunc(jsGetCharPressed);
