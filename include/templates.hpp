@@ -131,7 +131,6 @@ inline const char *dts =
 "declare function Rewind(fileID: number): void;\n"
 "// Write string to a file\n"
 "declare function Save(filePath: string, content: string);\n"
-"\n"
 "// Host a server\n"
 "declare function Host(port: number): void;\n"
 "// Check if app is hosting\n"
@@ -140,7 +139,6 @@ inline const char *dts =
 "declare function Host(address: string): void;\n"
 "// Send a message (server sends to all clients, clients send to the server)\n"
 "declare function SendMessage(message: string): void;\n"
-"\n"
 "// Open a serial port\n"
 "declare function OpenSerial(path: string, baudrate: number): void;\n"
 "// Write a message to the opened serial port\n"
@@ -149,6 +147,7 @@ inline const char *dts =
 "declare function IsSerialOpen(): boolean;\n"
 "// Try to reopen serial if originally failed to do so\n"
 "declare function SerialRetry(): void;\n"
+"// Read a line from serial\n"
 "declare function ReadSerial(): string;\n"
 "// Get the width of text\n"
 "declare function MeasureTextW(text: string, fontSize): number;\n"
@@ -163,7 +162,13 @@ inline const char *dts =
 "// Set the texture Filtering mode for a RenderTexture\n"
 "declare function TexFilterPoint(textureID: number): void;\n"
 "// Draw a RenderTexture\n"
-"declare function DrawRenderTexture(textureID: number): void";
+"declare function DrawRenderTexture(textureID: number): void;\n"
+"// Play Background Music (start playing now, looping is on)\n"
+"declare function StartMusic(path: string): number;\n"
+"// Update music stream\n"
+"declare function UpdateMusic(): void;\n"
+"// Change the audio volume of a music stream\n"
+"declare function SetMusicVolume(music: number, volume: number): void";
 
 
 const char *script_template_src = 

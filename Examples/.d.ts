@@ -125,7 +125,6 @@ declare function AtEOF(fileID: number): boolean;
 declare function Rewind(fileID: number): void;
 // Write string to a file
 declare function Save(filePath: string, content: string);
-
 // Host a server
 declare function Host(port: number): void;
 // Check if app is hosting
@@ -134,7 +133,6 @@ declare function IsHosting(): boolean;
 declare function Host(address: string): void;
 // Send a message (server sends to all clients, clients send to the server)
 declare function SendMessage(message: string): void;
-
 // Open a serial port
 declare function OpenSerial(path: string, baudrate: number): void;
 // Write a message to the opened serial port
@@ -143,6 +141,7 @@ declare function WriteSerial(message: string): void;
 declare function IsSerialOpen(): boolean;
 // Try to reopen serial if originally failed to do so
 declare function SerialRetry(): void;
+// Read a line from serial
 declare function ReadSerial(): string;
 // Get the width of text
 declare function MeasureTextW(text: string, fontSize): number;
@@ -158,3 +157,9 @@ declare function EndTextureMode(): void;
 declare function TexFilterPoint(textureID: number): void;
 // Draw a RenderTexture
 declare function DrawRenderTexture(textureID: number): void;
+// Play Background Music (start playing now, looping is on)
+declare function StartMusic(path: string): number;
+// Update music stream
+declare function UpdateMusic(): void;
+// Change the audio volume of a music stream
+declare function SetMusicVolume(music: number, volume: number): void;

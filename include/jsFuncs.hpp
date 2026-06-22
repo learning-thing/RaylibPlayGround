@@ -12,6 +12,8 @@
 #include <unordered_map>
 #include <cstring>
 #include <map>
+
+#include "sound.hpp"
 #ifdef multiplayer
 #include <multiPlayer.hpp>
 #endif
@@ -332,6 +334,27 @@ static void jsSetFont(js_State *J) {
 
 jsFunc(jsMaximizeWindow) {
     MaximizeWindow();
+}
+
+jsFunc(jsStartMusic) {
+    if (!IsAudioDeviceReady()) {
+        InitAudioDevice();
+    }
+    const size_t s = musics.size();
+    musics.push_back(LoadMusicStream(js_tostring(J, 1)));
+    musics[musics.size()-1].looping = true;
+    PlayMusicStream(musics[musics.size()-1]);
+    js_pushnumber(J, s);
+}
+
+jsFunc(jsSetMusicVolume) {
+    SetMusicVolume(musics[js_tointeger(J, 1)], js_tonumber(J, 2));
+}
+
+jsFunc(jsUpdateMusic) {
+    for (const auto& it : musics) {
+        UpdateMusicStream(it);
+    }
 }
 
 //Networking
@@ -850,6 +873,11 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsRewind);
     js_addFunc(jsSave);
     js_addFunc(jsCloseFile);
+
+    // Audio
+    js_addFunc(jsStartMusic);
+    js_addFunc(jsUpdateMusic);
+    js_addFunc(jsSetMusicVolume);
 
 #ifndef noserial
     // Serial (wtf am I doing)
