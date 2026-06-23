@@ -168,7 +168,11 @@ inline const char *dts =
 "// Update music stream\n"
 "declare function UpdateMusic(): void;\n"
 "// Change the audio volume of a music stream\n"
-"declare function SetMusicVolume(music: number, volume: number): void";
+"declare function SetMusicVolume(music: number, volume: number): void;\n"
+"// Load an animated Sprite\n"
+"declare function LoadSprite(path: string, width: number): void;\n"
+"// Draw an animated Sprite\n"
+"declare function DrawSprite(sprite: number, frame: number, x: number, y: number, width: number, height: number): void";
 
 
 const char *script_template_src = 

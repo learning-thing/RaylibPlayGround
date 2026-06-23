@@ -7,7 +7,9 @@
 #include <iostream>
 
 int jsShader::getUniformLoc(const char *name) const {
-    return GetShaderLocation(m_sShader, name);
+    const int loc = GetShaderLocation(m_sShader, name);;
+    std::cout << "Shader " << m_sFragmentPath <<  " location of \"" << name << "\" is " << loc << std::endl;
+    return loc;
 }
 
 void jsShader::begin() {

@@ -43,7 +43,8 @@ add_executable(RaylibPlayGround main.cpp include/jsFuncs.hpp
         include/templates.hpp
         include/serial.hpp
         include/physics.hpp
-        include/sound.hpp)
+        include/sound.hpp
+        include/sprite.hpp)
 
 if(MINGW)
     target_link_libraries(RaylibPlayGround

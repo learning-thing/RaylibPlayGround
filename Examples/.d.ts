@@ -163,3 +163,7 @@ declare function StartMusic(path: string): number;
 declare function UpdateMusic(): void;
 // Change the audio volume of a music stream
 declare function SetMusicVolume(music: number, volume: number): void;
+// Load an animated Sprite
+declare function LoadSprite(path: string, width: number): number;
+// Draw an animated Sprite
+declare function DrawSprite(sprite: number, frame: number, x: number, y: number, width: number, height: number): void;

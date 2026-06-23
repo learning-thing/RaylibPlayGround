@@ -9,6 +9,7 @@ var WHITE = {r: 255, g: 255, b: 255, a: 255};
 var PINK = {r: 255, g: 10, b: 255, a: 255};
 var BLACK = {r: 0, g: 0, b: 0, a: 255};
 var delta;
+var myUniform;
 
 function onStart() {
     print("Starting");
@@ -22,12 +23,12 @@ function onStart() {
     SetTargetFPS(100);
 }
 
-var myUniform;
 
 function onReady() {
     //SetTargetFPS(100);
-    print("Ready");
+    Print("Ready");
     shader = LoadShader("Shader/pointsVS.glsl", "Shader/pointsFS.glsl");
+    myUniform = GetUniformLocation(shader, "iTime");
     camera = {
         position: {x: 10, y: 20, z: 30},
         target: {x: 0, y: 0, z: 0},
@@ -35,12 +36,11 @@ function onReady() {
         fovy: 60,
     }
     SetWindowTitle("Shader fun");
-    myUniform = GetUniformLocation(shader, "iTime");
     x = 10;
     y = 10;
 }
 
-print("Hot reload");
+Print("Hot reload");
 //myUniform = GetUniformLocation(shader, "iTime");
 
 var velocity = {x: 0, y: 0};

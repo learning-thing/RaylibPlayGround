@@ -14,6 +14,7 @@
 #include <map>
 
 #include "sound.hpp"
+#include "sprite.hpp"
 #ifdef multiplayer
 #include <multiPlayer.hpp>
 #endif
@@ -446,9 +447,9 @@ jsFunc(jsEndShader) {
 }
 
 jsFunc(jsGetUniformLocation) {
+    const auto& shader = shaders[js_tointeger(J, 1)];
     const char *name = js_tostring(J, 2);
-    const int loc = shaders[js_tointeger(J, 1)].getUniformLoc(name);
-    std::cout << "Shader location of " << name << " is " << loc << std::endl;
+    const int loc = shader.getUniformLoc(name);
 
     js_pushnumber(J, loc);
 }
@@ -790,6 +791,21 @@ jsFunc(jsGetMonitorRefreshRate) {
     js_pushnumber(J, GetMonitorRefreshRate(js_tointeger(J, 1)));
 }
 
+jsFunc(jsLoadSprite) {// path, width
+    js_pushnumber(J,  loadSprite(js_tostring(J, 1), js_tointeger(J, 2)) );
+}
+
+jsFunc(jsDrawSprite) {//sprite, frame
+    drawSprite(
+            js_tointeger(J, 1),//Sprite
+            js_tointeger(J, 2),//Frame
+            js_tonumber(J, 3),//x
+            js_tonumber(J, 4),//y
+            js_tonumber(J, 5),//width
+            js_tonumber(J, 6)//height
+        );
+}
+
 inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsPrint);
     js_addFunc(jsBeginDrawing);
@@ -844,6 +860,8 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsDrawImage);
     js_addFunc(jsDrawTexturePro);
     js_addFunc(jsDrawLine);
+    js_addFunc(jsLoadSprite);
+    js_addFunc(jsDrawSprite);
 
     // - 3D
     js_addFunc(jsDrawGrid);
