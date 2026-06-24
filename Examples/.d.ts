@@ -167,3 +167,7 @@ declare function SetMusicVolume(music: number, volume: number): void;
 declare function LoadSprite(path: string, width: number): number;
 // Draw an animated Sprite
 declare function DrawSprite(sprite: number, frame: number, x: number, y: number, width: number, height: number): void;
+// Toggle fullscreen
+declare function ToggleFullscreen(): void;
+// Set which key should exit the app instead of ESC
+declare function SetExitKey(key: string): void;

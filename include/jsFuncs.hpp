@@ -151,6 +151,13 @@ static std::unordered_map<std::string, KeyboardKey> keyMap = {
     {"s", KEY_S },
     {"d", KEY_D },
 
+    {"e", KEY_E },
+    {"q", KEY_Q },
+    {"x", KEY_X },
+    {"y",  KEY_Y  },
+    {"tab", KEY_TAB},
+    {"r", KEY_R},
+
     {"up",   KEY_UP    },
     {"down", KEY_DOWN  },
     {"left", KEY_LEFT  },
@@ -161,13 +168,14 @@ static std::unordered_map<std::string, KeyboardKey> keyMap = {
     {"shift_r", KEY_RIGHT_SHIFT  },
     {"enter", KEY_ENTER          },
     {"backspace", KEY_BACKSPACE  },
+    {"esc", KEY_ESCAPE           },
+    {"end", KEY_END              },
     {"ctrl", KEY_LEFT_CONTROL    },
     {"ctrl_r", KEY_RIGHT_CONTROL },
 
-    {"e", KEY_E },
-    {"q", KEY_Q },
-    {"x", KEY_X },
-    {"y",  KEY_Y  }
+
+
+    {"F11", KEY_F11}
 };
 static Font defaultFont;
 
@@ -206,6 +214,12 @@ jsFunc(jsSetTargetFPS) { SetTargetFPS(js_tointeger(J, 1)); js_pop(J, 1); }
 jsFunc(jsDrawFPS) {DrawFPS(js_tointeger(J, 1), js_tointeger(J, 2)); js_pop(J, 2); }
 jsFunc(jsSin) { js_pushnumber(J, sin(js_tonumber(J, 1))); }
 jsFunc(jsCos) { js_pushnumber(J, cos(js_tonumber(J, 1))); }
+
+jsFunc(jsToggleFullscreen) {
+    const auto monitor = GetCurrentMonitor();
+    SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight( monitor) );
+    ToggleFullscreen();
+}
 jsFunc(jsGetFrameTime) {js_pushnumber(J, GetFrameTime()); }
 jsFunc(jsGetScreenWidth) { js_pushnumber(J, GetScreenWidth()); }
 jsFunc(jsGetScreenHeight) { js_pushnumber(J, GetScreenHeight()); }
@@ -228,6 +242,10 @@ jsFunc(jsGetCharPressed) {
     } else {
         js_pushundefined(J);
     }
+}
+
+jsFunc(jsSetExitKey) {
+    SetExitKey(keyMap[js_tostring(J, 1)]);
 }
 
 jsFunc(jsMeasureTextW) {
@@ -831,10 +849,12 @@ inline void setupRaylibFuncs(js_State *runtime) {
     js_addFunc(jsGetScreenWidth);
     js_addFunc(jsGetScreenHeight);
     js_addFunc(jsMaximizeWindow);
+    js_addFunc(jsToggleFullscreen);
     js_addFunc(jsSetWindowTitle);
     js_addFunc(jsCloseWindow);
     js_addFunc(jsAllowWindowResize);
     js_addFunc(jsResizeWindow);
+    js_addFunc(jsSetExitKey);
 
     //Monitor
     js_addFunc(jsGetCurrentMonitor);

@@ -170,9 +170,13 @@ inline const char *dts =
 "// Change the audio volume of a music stream\n"
 "declare function SetMusicVolume(music: number, volume: number): void;\n"
 "// Load an animated Sprite\n"
-"declare function LoadSprite(path: string, width: number): void;\n"
+"declare function LoadSprite(path: string, width: number): number;\n"
 "// Draw an animated Sprite\n"
-"declare function DrawSprite(sprite: number, frame: number, x: number, y: number, width: number, height: number): void";
+"declare function DrawSprite(sprite: number, frame: number, x: number, y: number, width: number, height: number): void;\n"
+"// Toggle fullscreen\n"
+"declare function ToggleFullscreen(): void;\n"
+"// Set which key should exit the app instead of ESC\n"
+"declare function SetExitKey(key: string): void";
 
 
 const char *script_template_src = 
