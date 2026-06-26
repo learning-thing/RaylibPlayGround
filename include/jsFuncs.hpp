@@ -39,6 +39,7 @@ js_newcfunction(runtime, from, to, 0); \
 js_setglobal(runtime, to)
 */
 
+
 inline bool g_headLessMode = false;
 inline char **args;
 inline unsigned int argCount;
